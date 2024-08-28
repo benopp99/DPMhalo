@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-from model import myutils,darkmatter,model
+from dpm import myutils,darkmatter,modelprofiles
 
 ModelDir = '/home/bo256/'
 
@@ -126,7 +126,7 @@ if(modelID == "ClusterGroupScaled5disp"):
 if(modelID == "ClusterGroupScaled5ldisp"):
   sigmalogne = 0.15
 
-ModelMFlexGNFWParams = model.ModelMFlexGNFW(Mhalo,redshift,Pnorm12,alphatrP12,alphahiP12,alphaloP12,c500P,alphatrPMvar,alphahiPMvar,alphaloPMvar,betaP,gammaP,nenorm12,alphatrne12,alphahine12,alphalone12,c500ne,alphatrneMvar,alphahineMvar,alphaloneMvar,betane,gammane,sigmalogne,Znorm12,alphatrZ12,alphahiZ12,alphaloZ12,c500Z,alphatrZMvar,alphahiZMvar,alphaloZMvar,betaZ,gammaZ)
+ModelMFlexGNFWParams = dpm.ModelMFlexGNFW(Mhalo,redshift,Pnorm12,alphatrP12,alphahiP12,alphaloP12,c500P,alphatrPMvar,alphahiPMvar,alphaloPMvar,betaP,gammaP,nenorm12,alphatrne12,alphahine12,alphalone12,c500ne,alphatrneMvar,alphahineMvar,alphaloneMvar,betane,gammane,sigmalogne,Znorm12,alphatrZ12,alphahiZ12,alphaloZ12,c500Z,alphatrZMvar,alphahiZMvar,alphaloZMvar,betaZ,gammaZ)
 
 fout = open("%s/ModelMFlexGNFW%s.M%5.2f.z%4.2f.dat"%(ModelDir,modelID,lMhalo,redshift),"w")
 fout.write("#lM200c z R/R200c P n_e T Z DM tau_SZ y_SZ SB_SoftXray N_OVI N_OVII N_OVIII sigma_ne\n")
