@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import dpm
 from dpm import myutils,darkmatter,modelprofiles
 
 ModelDir = '/home/bo256/'
