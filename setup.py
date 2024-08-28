@@ -1,6 +1,7 @@
 #from distutils.core import setup, Extension
 #import os
-from setuptools import setup
+from setuptools import find_packages, setup
+from setuptools.extension import Extension
 
 
 setup(name='DPM',
@@ -10,7 +11,8 @@ setup(name='DPM',
       author='Benjamin D. Oppenheimer',
       author_email='beop5934@colorado.edu',
       license='MIT',
-      packages=['dpm'],
+      #packages=['dpm'],
+      packages=find_packages(),
       #package_dir={'DPM':'dpm'},
       zip_safe=False,
       install_requires=['numpy',
@@ -21,9 +23,6 @@ setup(name='DPM',
                         'trident',
                         'pyxsim'
       ]
-
-
-
-
 )
+
 
