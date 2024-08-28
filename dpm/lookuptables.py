@@ -81,7 +81,7 @@ def write_npy_tables(band,redshift):
 
 def load_grid(band,redshift):
 
-    grid = np.load("../lookuptables/%s_z%5.3f.npy"%(band,redshift))
+    grid = np.load("lookuptables/%s_z%5.3f.npy"%(band,redshift))
 
     return(grid)
              
