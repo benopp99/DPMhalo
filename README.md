@@ -1,6 +1,6 @@
 # DPM
 The Descriptive Parametric Model
 
+# Installation
 
-Installation
 
