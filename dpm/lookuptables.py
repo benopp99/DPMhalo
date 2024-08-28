@@ -1,4 +1,5 @@
 import numpy as np
+import dpm
 from dpm import iontab
 from dpm import emissiontab
 from scipy.interpolate import RegularGridInterpolator
@@ -82,9 +83,8 @@ def write_npy_tables(band,redshift):
 
 def load_grid(band,redshift):
 
-    path = dpm.__path__[0]
-    
-    grid = np.load(path + "/lookuptables/%s_z%5.3f.npy"%(band,redshift))
+    package_path = dpm.__path__[0] # Only way I know how to get path to lookuptables data.  
+    grid = np.load(package_path + "/lookuptables/%s_z%5.3f.npy"%(band,redshift))
 
     return(grid)
              
