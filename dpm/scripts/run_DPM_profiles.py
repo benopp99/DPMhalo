@@ -134,11 +134,11 @@ if(modelID == "ClusterGroupScaled5ldisp"):
 ModelMFlexGNFWParams = dpm.ModelMFlexGNFW(Mhalo,redshift,Pnorm12,alphatrP12,alphahiP12,alphaloP12,c500P,alphatrPMvar,alphahiPMvar,alphaloPMvar,betaP,gammaP,nenorm12,alphatrne12,alphahine12,alphalone12,c500ne,alphatrneMvar,alphahineMvar,alphaloneMvar,betane,gammane,sigmalogne,Znorm12,alphatrZ12,alphahiZ12,alphaloZ12,c500Z,alphatrZMvar,alphahiZMvar,alphaloZMvar,betaZ,gammaZ)
 
 fout = open("%s/ModelMFlexGNFW%s.M%5.2f.z%4.2f.dat"%(ModelDir,modelID,lMhalo,redshift),"w")
-fout.write("#lM200c z R/R200c P n_e T Z DM tau_SZ y_SZ SB_SoftXray N_OVI N_OVII N_OVIII sigma_ne\n")
+fout.write("#lM200c z R/R200c P n_e[cm^-3] T[K] Z DM tau_SZ y_SZ SB_SoftXray N_OVI[cm^-2] N_OVII[cm^-2] N_OVIII[cm^-2] sigma_ne rho_DM[g/cm^3]\n")
 
 R200c_kpc = myutils.R200c_from_lM200c(np.log10(Mhalo),redshift)
 
-print("R200c_kpc,np.log10(Mhalo),redshift= ",R200c_kpc,np.log10(Mhalo),redshift)
+#print("R200c_kpc,np.log10(Mhalo),redshift= ",R200c_kpc,np.log10(Mhalo),redshift)
 
 for i in range(0,24,1): 
   R = 10**(-2.0+i*0.1)
