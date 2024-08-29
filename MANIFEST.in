@@ -1,1 +1,2 @@
-
+include dpm/lookuptables/*.npy
+include dpm/scripts/*.py
