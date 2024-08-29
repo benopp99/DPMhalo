@@ -1,2 +1,6 @@
 include dpm/lookuptables/*.npy
 include dpm/scripts/*.py
+
+recursive-include *.py
+include README.md
+include LICENSE
