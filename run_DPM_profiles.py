@@ -5,6 +5,10 @@ from dpm import myutils,darkmatter,modelprofiles
 
 ModelDir = '/home/bo256/'
 
+if(len(sys.argv) < 3):
+  print("Usage: run_DPM_profiles.py 1) model name, 2) log(M200c), Optional: 3) redshift (default 0.0)\n model names: ClusterBased5, ClusterScaled5, ClusterGroupScaled5, ClusterBased5ldisp, ClusterScaled5ldisp, ClusterGroupScaled5ldisp, ClusterBased5disp, ClusterScaled5disp, ClusterGroupScaled5disp\n")
+  exit()
+
 modelID = sys.argv[1]
 lMhalo = float(sys.argv[2])
 Mhalo = 10**lMhalo
