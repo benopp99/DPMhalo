@@ -1,6 +1,6 @@
 #return the 31 DPM model parameters, for our favored models.  
 
-def returnmodelparams(ModelID):
+def returnmodelparams(modelID):
 
     if(modelID.startswith("ClusterBased5") | modelID.startswith("Model1")):
         Pnorm12 = 4.4e+02
