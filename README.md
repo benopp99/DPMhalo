@@ -22,4 +22,13 @@ python setup.py install
 
 # Example Script
 
-Upon installation, test that you can access the dpm code by 
+
+
+Upon installation, test that you can access a script to create halo radial profiles for a given M200c and redshift, via the script in your [site-packages directory]/dpm/scripts/run_DPM_profiles.py.  
+
+If you do not know your site-pacakges directory, you can obtain this script via:
+
+https://github.com/benopp99/DPM/tree/main/dpm/scripts/run_DPM_profiles.py
+
+
+
