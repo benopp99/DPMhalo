@@ -1,4 +1,5 @@
 import numpy as np
+import dpm
 from dpm import iontab
 from dpm import emissiontab
 from scipy.interpolate import RegularGridInterpolator
