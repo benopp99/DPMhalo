@@ -82,8 +82,8 @@ def write_npy_tables(band,redshift):
 
 def load_grid(band,redshift):
 
-    #path = dpm.__path__[0]
-    path = "."
+    path = dpm.__path__[0]
+    #path = "."
     
     grid = np.load(path + "/lookuptables/%s_z%5.3f.npy"%(band,redshift))
 
