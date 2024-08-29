@@ -8,3 +8,7 @@ __credits__ = 'University of Colorado, Boulder'
 from dpm.modelprofiles import (
     ModelMFlexGNFW,
     )
+
+from dpm.lookuptables import *
+
+from dpm.scripts import *
