@@ -4,17 +4,17 @@ from setuptools import find_packages, setup
 from setuptools.extension import Extension
 
 
-setup(name='DPM',
+setup(name='DPMhalo',
       version='0.1',
-      description='The Descriptive Parametric Model',
-      url='https://github.com/benopp99/DPM',
+      description='The Descriptive Parametric Model for halos',
+      url='https://github.com/benopp99/DPMhalo',
       author='Benjamin D. Oppenheimer',
       author_email='beop5934@colorado.edu',
       license='MIT',
-      #packages=['dpm'],
+      #packages=['dpmhalo'],
       packages=find_packages(),
       include_package_data=True,
-      #package_dir={'DPM':'dpm'},
+      #package_dir={'DPMhalo':'dpmhalo'},
       zip_safe=False,
       install_requires=['numpy',
                         'astropy',
