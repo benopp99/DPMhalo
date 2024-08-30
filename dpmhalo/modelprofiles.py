@@ -1,9 +1,9 @@
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
-from dpm import gaussian
-from dpm import lookuptables
-from dpm import myconstants as myc
+from dpmhalo import gaussian
+from dpmhalo import lookuptables
+from dpmhalo import myconstants as myc
 import colossus
 from colossus.cosmology import cosmology
 
