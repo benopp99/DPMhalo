@@ -6,7 +6,7 @@ cosmo = cosmology.setCosmology('planck15')
 ###    flat = True, Om0 = 0.3111, Ode0 = 0.6888, Ob0 = 0.0490, H0 = 67.66, sigma8 = 0.8102, ns = 0.9665
 ###    de_model = lambda, relspecies = True, Tcmb0 = 2.7255, Neff = 3.0460, powerlaw = False
 
-print("cosmo= ", cosmo)
+#print("cosmo= ", cosmo)
 
 hubbleparam = cosmo.H0/100. #0.7
 HubbleParam = cosmo.H0  #100.*hubbleparam
