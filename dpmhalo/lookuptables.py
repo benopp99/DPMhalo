@@ -1,7 +1,7 @@
 import numpy as np
-import dpm
-from dpm import iontab
-from dpm import emissiontab
+import dpmhalo
+from dpmhalo import iontab
+from dpmhalo import emissiontab
 from scipy.interpolate import RegularGridInterpolator
 import os 
 
@@ -83,7 +83,7 @@ def write_npy_tables(band,redshift):
 
 def load_grid(band,redshift):
 
-    path = dpm.__path__[0]
+    path = dpmhalo.__path__[0]
     #path = "."
     
     grid = np.load(path + "/lookuptables/%s_z%5.3f.npy"%(band,redshift))
