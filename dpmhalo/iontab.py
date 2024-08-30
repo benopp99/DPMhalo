@@ -3,7 +3,7 @@ import trident
 from astropy import constants as const
 import yt
 from yt.units import kpc
-from dpm import myconstants as myc 
+from dpmhalo import myconstants as myc 
 
 class Trident:
     def __init__(self, ne, T, Z, redshift):
