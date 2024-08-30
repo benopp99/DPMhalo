@@ -5,6 +5,6 @@ __author__ = 'Benjamin D. Oppenheimer'
 __credits__ = 'University of Colorado, Boulder'
 
 
-from dpm.modelprofiles import (
+from dpmhalo.modelprofiles import (
     ModelMFlexGNFW,
     )
