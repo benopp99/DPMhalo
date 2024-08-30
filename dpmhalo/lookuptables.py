@@ -105,8 +105,8 @@ def interpolate_lookuptable(band, grid, lne, lT, lZ, redshift):
         fn = RegularGridInterpolator((lne_array,lT_array), grid,bounds_error=False, fill_value=0.0)
         val = fn([lne, lT])
         val *= 10**lZ
-        
-    return(val)
+
+    return(val.item())
             
 
 #band = "SoftXray"
