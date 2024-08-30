@@ -1,6 +1,6 @@
-# DPM
+# DPMhalo
 
-The Descriptive Parametric Model version 0.1 created on August 28, 2024
+The Descriptive Parametric Model for gaseous halos version 0.1 created on August 28, 2024
 
 # Installation
 
@@ -8,15 +8,15 @@ The Descriptive Parametric Model version 0.1 created on August 28, 2024
 
 via pip:
 
-pip install git+https://github.com/benopp99/DPM.git#egg=dpm
+pip install git+https://github.com/benopp99/DPMhalo.git#egg=dpmhalo
 
 
 
 via git: 
 
-git clone https://github.com/benopp99/DPM.git
+git clone https://github.com/benopp99/DPMhalo.git
 
-cd DPM
+cd dpmhalo
 
 python setup.py install
 
