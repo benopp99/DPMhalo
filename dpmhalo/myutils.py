@@ -1,6 +1,6 @@
 import numpy as np
 from astropy import constants as const
-from dpm import myconstants as myc 
+from dpmhalo import myconstants as myc 
 import astropy.units as u
 import colossus
 from colossus.halo import mass_so
