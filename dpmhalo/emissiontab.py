@@ -4,7 +4,7 @@ import trident
 import yt
 from yt.units import kpc
 from astropy import constants as const
-from dpm import myconstants as myc
+from dpmhalo import myconstants as myc
 
 class pyXSIM:
     def __init__(self, ne, T, Z, redshift):
