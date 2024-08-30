@@ -1,5 +1,5 @@
-from dpm import myconstants as myc
-from dpm import myutils
+from dpmhalo import myconstants as myc
+from dpmhalo import myutils
 from astropy import constants as const
 from colossus.halo import concentration
 from colossus.halo import profile_nfw
