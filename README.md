@@ -36,5 +36,14 @@ https://github.com/benopp99/DPM/tree/main/dpm/scripts/run_DPM_profiles.py
 
 This script takes 2 or 3 arguments.  Run it once with no arguments (python run_DPM_profiles.py) and it will explain the arguments of this script.  
 
+# DPM Website
 
 
+Please visit the below URL to see results of the DPM:  
+
+https://casa.colorado.edu/~boppenheimer/ParamModel_main.html
+
+
+This project is the result of a Hubble Theory Grant HST-AR-17570:  
+
+https://www.stsci.edu/cgi-bin/get-proposal-info?id=17570&observatory=HST
