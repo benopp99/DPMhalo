@@ -47,3 +47,8 @@ https://casa.colorado.edu/~boppenheimer/ParamModel_main.html
 This project is the result of a Hubble Theory Grant HST-AR-17570:  
 
 https://www.stsci.edu/cgi-bin/get-proposal-info?id=17570&observatory=HST
+
+# Cautionary Notes  
+
+
+As of September 4, 2024, the O VI, O VII, and O VIII ionization fractions all assume z=0.  This is also true of the Soft X-ray emission calculations.  We will update these soon.  
