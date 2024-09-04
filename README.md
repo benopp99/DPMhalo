@@ -4,7 +4,7 @@ The Descriptive Parametric Model for gaseous halos version 0.1 created on August
 
 # Brief Description
 
-This is a project to create atmospheric radial profiles for gaseous halos as a function of halo mass (M) and redshift (z).  This model only creates 1-D spherical profiles and is meant to model the volume-filling component of the circumgalactic medium (CGM).  Embedded, cloud-like structures are not directly modeled.  A paper will be released, Oppenheimer, B. D.; Voit, G. M. et al..  In the meantime, you are welcome to download version 0.X of this code.  We encourage users to use these profiles in their research.  
+This is a project to create atmospheric radial profiles for gaseous halos as a function of halo mass (M) and redshift (z).  This model only creates 1-D spherical profiles and is meant to model the volume-filling component of the circumgalactic medium (CGM).  Embedded, cloud-like structures are not modeled.  A paper will be released, Oppenheimer, B. D.; Voit, G. M. et al..  In the meantime, you are welcome to download version 0.X of this code.  We encourage users to use these profiles in their research.    
 
 # Installation
 
