@@ -34,7 +34,7 @@ If you do not know your site-pacakges directory, you can obtain this script via:
 
 https://github.com/benopp99/DPM/tree/main/dpm/scripts/run_DPM_profiles.py
 
-This script takes 2 or 3 arguments.  Run it once first with no arguments (python run_DPM_profiles.py) and it will explain the arguments of this script.  
+This script takes 2 or 3 arguments.  Run it once with no arguments (python run_DPM_profiles.py) and it will explain the arguments of this script.  
 
 
 
