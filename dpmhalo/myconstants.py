@@ -26,5 +26,6 @@ K_per_keV = 1.16e+07
 
 M_solar_g = 1.989e+33 
 
+nO_per_nH_Zsolar = 0.00048977881 # 10**-3.31
 Z_Solar_Asplund = 0.0134
 Z_Solar_Anders = 0.0201
