@@ -162,7 +162,7 @@ for i in range(0,24,1):
   T = Pe/ne
 
   rho_DM = darkmatter.return_DMrho_for_R(R,np.log10(Mhalo),redshift)
-  
+
   print("%5.2f %5.2f %5.3e %5.3e %5.3e %5.3e %5.3e %5.1f %5.3e %5.3e %5.3e %5.3e %5.3e %5.3e %4.2f %5.3e"%(np.log10(Mhalo),redshift,R,P,ne,T,Z,DM.value,tauSZ.value,ySZ.value,SoftXray.value,NOVI.value,NOVII.value,NOVIII.value,sigmalogne,rho_DM))
   fout.write("%5.2f %5.2f %5.3e %5.3e %5.3e %5.3e %5.3e %5.1f %5.3e %5.3e %5.3e %5.3e %5.3e %5.3e %4.2f %5.3e\n"%(np.log10(Mhalo),redshift,R,P,ne,T,Z,DM.value,tauSZ.value,ySZ.value,SoftXray.value,NOVI.value,NOVII.value,NOVIII.value,sigmalogne,rho_DM))
 
