@@ -4,14 +4,12 @@ from astropy import units as u
 from dpmhalo import gaussian
 from dpmhalo import lookuptables
 from dpmhalo import myconstants as myc
+import trident
 import colossus
 from colossus.cosmology import cosmology
 
 cosmo = cosmology.setCosmology('planck15')
 
-OVI_lookuptable = lookuptables.load_grid("OVI",0.0)
-OVII_lookuptable = lookuptables.load_grid("OVII",0.0)
-OVIII_lookuptable = lookuptables.load_grid("OVIII",0.0)
 SoftXray_lookupTable = lookuptables.load_grid("SoftXray",0.0)  
 
 class ModelMFlexGNFW:
@@ -126,24 +124,24 @@ class ModelMFlexGNFW:
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
           Integral += 2*path_cm*u.cm * self.Upsilon_kSZ(ne,redshift) * frac_vol
-      if(obs_type=="NOVI"):
+      if(obs_type=="N OVI"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
-          Integral += 2*path_cm*u.cm * self.Upsilon_NO("OVI",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
-      if(obs_type=="NOVII"):
+          Integral += 2*path_cm*u.cm * self.Upsilon_NO("O VI",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
+      if(obs_type=="N OVII"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
-          Integral += 2*path_cm*u.cm * self.Upsilon_NO("OVII",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
-      if(obs_type=="NOVIII"):
+          Integral += 2*path_cm*u.cm * self.Upsilon_NO("O VII",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
+      if(obs_type=="N OVIII"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
-          Integral += 2*path_cm*u.cm * self.Upsilon_NO("OVIII",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol        
+          Integral += 2*path_cm*u.cm * self.Upsilon_NO("O VIII",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol        
       if(obs_type=="SoftXray"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
@@ -165,19 +163,16 @@ class ModelMFlexGNFW:
 
   def Upsilon_kSZ(self,ne,redshift):
     return(ne*u.cm**-3*const.sigma_T.to('cm**2'))
-
-  def Upsilon_NO(self,ion,PT,ne,Z,redshift):    
+  
+  def Upsilon_NO(self,ion,PT,ne,Z,redshift):
     T = PT/ne
-    if(ion=="OVI"):
-      lookuptable = OVI_lookuptable
-    if(ion=="OVII"):
-      lookuptable = OVII_lookuptable
-    if(ion=="OVIII"):
-      lookuptable = OVIII_lookuptable
+    nH = ne/myc.ne_to_nH ### check!!!
+    
+    Ofrac = trident.calculate_ion_fraction(ion, nH, T, redshift)
 
-    Oion = lookuptables.interpolate_lookuptable(ion,lookuptable,np.log10(ne),np.log10(T),np.log10(Z),redshift)
+    nO = nH*myc.nO_per_nH_Zsolar*Z*Ofrac
 
-    return(Oion)
+    return(nO)
 
   def Upsilon_Xray(self,band,PT,ne,Z,redshift):
     T = PT/ne
