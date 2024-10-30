@@ -124,19 +124,19 @@ class ModelMFlexGNFW:
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
           Integral += 2*path_cm*u.cm * self.Upsilon_kSZ(ne,redshift) * frac_vol
-      if(obs_type=="N OVI"):
+      if(obs_type=="NOVI"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
           Integral += 2*path_cm*u.cm * self.Upsilon_NO("O VI",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
-      if(obs_type=="N OVII"):
+      if(obs_type=="NOVII"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
           Integral += 2*path_cm*u.cm * self.Upsilon_NO("O VII",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
-      if(obs_type=="N OVIII"):
+      if(obs_type=="NOVIII"):
         for i in range(logne_nstep+1):
           logne = np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift))+logne_step*(i-logne_nstep/2.)
           ne = 10**logne
