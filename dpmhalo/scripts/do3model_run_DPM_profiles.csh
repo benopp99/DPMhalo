@@ -3,7 +3,7 @@
 
 set redshift = 0.00
 
-set model = ClusterBased5
+set model = Model1
 @ lm10 = 115 
 rm -f 3models.z${redshift}.ls
 while ($lm10 <= 150)
@@ -18,7 +18,7 @@ while ($lm10 <= 150)
     @ lm10+=5
 end
 
-set model = ClusterScaled5
+set model = Model2
 @ lm10 = 115 
 while ($lm10 <= 150)
     set lm = `echo $lm10 | awk '{printf("%5.2f",$1/10)}'`
@@ -32,7 +32,7 @@ while ($lm10 <= 150)
     @ lm10+=5
 end
 
-set model = ClusterGroupScaled5
+set model = Model3
 @ lm10 = 115 
 while ($lm10 <= 150)
     set lm = `echo $lm10 | awk '{printf("%5.2f",$1/10)}'`

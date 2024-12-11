@@ -13,7 +13,7 @@ while ($lm10 <= 150)
     else
         set modellabel_bool = 0
     endif
-    #python run_DPM_profile.py $model $lm $redshift
+    python run_DPM_profile.py $model $lm $redshift
     echo "ModelMFlexGNFW${model}.M${lm}.z${redshift}.dat $model $lm $redshift - 1 ${modellabel_bool}" >> ${model}.z${redshift}.ls
     @ lm10+=5
 end
