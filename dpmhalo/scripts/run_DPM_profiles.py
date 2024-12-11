@@ -6,7 +6,7 @@ from dpmhalo import myutils,darkmatter,modelprofiles
 ModelDir = './'
 
 if(len(sys.argv) < 3):
-  print("Usage: run_DPM_profiles.py 1) model name, 2) log(M200c), Optional: 3) redshift (default 0.0)\n model names: ClusterBased5, ClusterScaled5, ClusterGroupScaled5, ClusterBased5ldisp, ClusterScaled5ldisp, ClusterGroupScaled5ldisp, ClusterBased5disp, ClusterScaled5disp, ClusterGroupScaled5disp\n")
+  print("Usage: run_DPM_profiles.py 1) model name, 2) log(M200c), Optional: 3) redshift (default 0.0)\n model names: Model1, Model2, Model3, Model3ldisp, Model3disp\n")
   exit()
 
 modelID = sys.argv[1]
@@ -17,7 +17,7 @@ if(len(sys.argv)>3):
 else:
   redshift = 0.0
 
-if(modelID.startswith("ClusterBased5")):
+if(modelID.startswith("ClusterBased5") | modelID.startswith("Model1")):
   Pnorm12 = 4.4e+02
   alphatrP12 = 1.3
   alphahiP12 = 4.1
@@ -50,7 +50,7 @@ if(modelID.startswith("ClusterBased5")):
   betaZ = 0.0
   gammaZ = 0.0
 
-if(modelID.startswith("ClusterScaled5")):
+if(modelID.startswith("ClusterScaled5") | modelID.startswith("Model2")):
   Pnorm12 = 1.24e+02
   alphatrP12 = 1.3
   alphahiP12 = 4.1
@@ -83,7 +83,7 @@ if(modelID.startswith("ClusterScaled5")):
   betaZ = 0.0
   gammaZ = 0.0
  
-if(modelID.startswith("ClusterGroupScaled5")):
+if(modelID.startswith("ClusterGroupScaled5") | modelID.startswith("Model3")):
   Pnorm12 = 7.6e+01
   alphatrP12 = 0.2
   alphahiP12 = 2.0
@@ -116,19 +116,9 @@ if(modelID.startswith("ClusterGroupScaled5")):
   betaZ = 0.0
   gammaZ = 0.0
 
-if(modelID == "ClusterBased5disp"):
+if(modelID.endswith("disp")):
   sigmalogne = 0.30
-if(modelID == "ClusterBased5ldisp"):
-  sigmalogne = 0.15
-  
-if(modelID == "Clusterscaled5disp"):
-  sigmalogne = 0.30
-if(modelID == "ClusterScaled5ldisp"):
-  sigmalogne = 0.15
-
-if(modelID == "ClusterGroupScaled5disp"):
-  sigmalogne = 0.30
-if(modelID == "ClusterGroupScaled5ldisp"):
+if(modelID.endswith("ldisp")):
   sigmalogne = 0.15
 
 ModelMFlexGNFWParams = dpmhalo.ModelMFlexGNFW(Mhalo,redshift,Pnorm12,alphatrP12,alphahiP12,alphaloP12,c500P,alphatrPMvar,alphahiPMvar,alphaloPMvar,betaP,gammaP,nenorm12,alphatrne12,alphahine12,alphalone12,c500ne,alphatrneMvar,alphahineMvar,alphaloneMvar,betane,gammane,sigmalogne,Znorm12,alphatrZ12,alphahiZ12,alphaloZ12,c500Z,alphatrZMvar,alphahiZMvar,alphaloZMvar,betaZ,gammaZ)
@@ -162,7 +152,7 @@ for i in range(0,24,1):
   T = Pe/ne
 
   rho_DM = darkmatter.return_DMrho_for_R(R,np.log10(Mhalo),redshift)
-
+  
   print("%5.2f %5.2f %5.3e %5.3e %5.3e %5.3e %5.3e %5.1f %5.3e %5.3e %5.3e %5.3e %5.3e %5.3e %4.2f %5.3e"%(np.log10(Mhalo),redshift,R,P,ne,T,Z,DM.value,tauSZ.value,ySZ.value,SoftXray.value,NOVI.value,NOVII.value,NOVIII.value,sigmalogne,rho_DM))
   fout.write("%5.2f %5.2f %5.3e %5.3e %5.3e %5.3e %5.3e %5.1f %5.3e %5.3e %5.3e %5.3e %5.3e %5.3e %4.2f %5.3e\n"%(np.log10(Mhalo),redshift,R,P,ne,T,Z,DM.value,tauSZ.value,ySZ.value,SoftXray.value,NOVI.value,NOVII.value,NOVIII.value,sigmalogne,rho_DM))
 
