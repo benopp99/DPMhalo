@@ -84,7 +84,6 @@ def write_npy_tables(band,redshift):
 def load_grid(band,redshift):
 
     path = dpmhalo.__path__[0]
-    #path = "."
     
     grid = np.load(path + "/lookuptables/%s_z%5.3f.npy"%(band,redshift))
 
@@ -107,8 +106,3 @@ def interpolate_lookuptable(band, grid, lne, lT, lZ, redshift):
         val *= 10**lZ
 
     return(val.item())
-            
-
-#band = "SoftXray"
-#redshift= 0.0
-

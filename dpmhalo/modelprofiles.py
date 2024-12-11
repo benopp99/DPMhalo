@@ -8,7 +8,7 @@ import trident
 import colossus
 from colossus.cosmology import cosmology
 
-cosmo = cosmology.setCosmology('planck15')
+cosmo = cosmology.setCosmology('planck18')
 
 SoftXray_lookupTable = lookuptables.load_grid("SoftXray",0.0)  
 
@@ -148,9 +148,7 @@ class ModelMFlexGNFW:
           ne = 10**logne
           frac_vol = gaussian.fractional_volume(np.log10(self.calcne((midpoint_kpc)/R200c_kpc,Mhalo,redshift)),self.sigmalogne,logne,logne_step,logne_nsigma)
           Integral += 2*path_cm*u.cm * self.Upsilon_Xray("0.5_2.0keV",self.calcP((midpoint_kpc)/R200c_kpc,Mhalo,redshift),ne,self.calcZ((midpoint_kpc)/R200c_kpc,Mhalo,redshift),redshift) * frac_vol
-      ##step_kpc = 0.01
-      #step_kpc = r_kpc/10.
-      step_kpc = r_kpc/50.
+      step_kpc = r_kpc/50. # We integrate using 1/50th the step kpc size.  Can be made less to run faster. 
       r_kpc += step_kpc
       
     return(Integral)

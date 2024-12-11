@@ -1,6 +1,6 @@
 import numpy as np
 from astropy import constants as const
-from dpmhalo import myconstants as myc 
+from dpmhalo import myconstants as myc
 import astropy.units as u
 import colossus
 from colossus.halo import mass_so
@@ -46,6 +46,13 @@ def R200c_to_R500c(R200c, M200c, redshift=0.0):
     M500c_h, R500c_h, c500c = mass_adv.changeMassDefinitionCModel(M200c_h, redshift, '200c', '500c')
     return(R500c_h/myc.hubbleparam)
 
+def R200c_to_R200m(R200c, M200c, redshift=0.0):
+    R200c_h = R200c*myc.hubbleparam
+    M200c_h = mass_so.R_to_M(R200c_h, redshift, '200c')
+    M200m_h, R200m_h, c200m = mass_adv.changeMassDefinitionCModel(M200c_h, redshift, '200c', '200m')
+    return(R200m_h/myc.hubbleparam)
+
+
 def R500c_to_R200c(R500c, redshift=0.0):
     R500c_h = R500c*myc.hubbleparam
     M500c_h = mass_so.R_to_M(R500c_h, redshift, '200c')
@@ -58,10 +65,6 @@ def fR200c_to_fRvir(fR200c, M200c, redshift=0.0):
     R200c_h = mass_so.M_to_R(M200c_h, redshift, '200c')
     Mvir_h, Rvir_h, cvir = mass_adv.changeMassDefinitionCModel(M200c_h, redshift, '200c', 'vir')
     return(fR200c*R200c_h/Rvir_h)
-    #R200c_h = R200c*myc.hubbleparam
-    #M200c_h = mass_so.R_to_M(R200c_h, redshift, '200c')
-    #Mvir_h, Rvir_h, cvir = mass_adv.changeMassDefinitionCModel(M200c_h, redshift, '200c', 'vir')
-    #return(R200c_h/Rvir_h)
 
 def fRvir_to_fR200c(fRvir, Mvir, redshift=0.0):
     Mvir_h = Mvir*myc.hubbleparam
@@ -105,13 +108,10 @@ def R200c_from_lM200c(lM200c, redshift=0.0):
 
     return(R200c)
 
-#def return_R200c_in_cm(lM_200,redshift=0.0):
 def R200c_from_lM200c_in_cm(lM200c, redshift=0.0):
    
     R200c = R200c_from_lM200c(lM200c,redshift)
     R200c_cm = R200c*myc.cm_per_kpc
-    #omegaratio = (myc.OmegaM+myc.OmegaL/(1+redshift)**3) 
-    #R_200_cm = myc.cm_per_kpc*1.63e-2*(10**lM_200*myc.hubbleparam)**0.333/omegaratio**0.333/(1+redshift)/myc.hubbleparam
     return(R200c_cm)
 
 def lM200c_from_R200c(R200c, redshift=0.0):

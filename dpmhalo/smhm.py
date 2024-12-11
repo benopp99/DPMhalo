@@ -1,36 +1,40 @@
 import numpy as np
-import myutils
+from dpmhalo import myutils
+import os
 
-#This is the replacement for the Behroozi2013 code below and is includes returning error ranges.  
-def Behroozi2019_UNIVERSEMACHINE_return_mhalo(lMStar,err_lMStar,redshift,galaxy_type_tag=''):
+rootdir = os.path.dirname(__file__)
+DataDir = rootdir + '/Data/'
+
+#This is the replacement for the Behroozi2013 code below and includes returning error ranges.  
+def Behroozi2019_UNIVERSEMACHINE_return_lM200c(lMStar,err_lMStar,redshift,galaxy_type_tag=''):
 
     redshift_tag = round(redshift*10)
     
-    file_name = 'Data/Behroozi_UNIVERSEMACHINE/SMHM_med_cen%s.z0.%d.txt'%(galaxy_type_tag,redshift_tag)
+    file_name = '%s/Behroozi_UNIVERSEMACHINE/SMHM_med_cen%s.z0.%d.txt'%(DataDir,galaxy_type_tag,redshift_tag)
     
-    lmvir, lms, lms_errplus, lms_errneg = np.loadtxt(file_name,usecols=(0,1,3,4),unpack=True)
+    lMvir, lMS, lMS_errplus, lMS_errneg = np.loadtxt(file_name,usecols=(0,1,3,4),unpack=True)
 
-    lm200c = myutils.lMvir_to_lM200c(lmvir,redshift)
+    lM200c = myutils.lMvir_to_lM200c(lMvir,redshift)
     
     # Sometimes the error return is negative and unrealistic, so we zero it.  
-    lms_errplus = np.where(lms_errplus>0,lms_errplus,0)
-    lms_errneg = np.where(lms_errneg>0,lms_errneg,0)
+    lMS_errplus = np.where(lMS_errplus>0,lMS_errplus,0)
+    lMS_errneg = np.where(lMS_errneg>0,lMS_errneg,0)
 
-    lms_max = lms+lms_errplus
-    lms_min = lms-lms_errneg
+    lMS_max = lMS+lMS_errplus
+    lMS_min = lMS-lMS_errneg
 
-    lMHalo_med = np.interp(lMStar, lms, lm200c)
+    lM200c_med = np.interp(lMStar, lMS, lM200c)
 
     # This adds errors linearly, not in quadarture, because we are making conservative (wide) errors.  
-    lMHalo_max = np.interp(lMStar+err_lMStar, lms_min, lm200c)
-    lMHalo_min = np.interp(lMStar-err_lMStar, lms_max, lm200c)
+    lM200c_max = np.interp(lMStar+err_lMStar, lMS_min, lM200c)
+    lM200c_min = np.interp(lMStar-err_lMStar, lMS_max, lM200c)
 
-    #print("lMHalo_med, lMHalo_max-lMHalo_med, lMHalo_med-lMHalo_min= ", lMHalo_med, lMHalo_max-lMHalo_med, lMHalo_med-lMHalo_min)
+    #print("lM200c_med, lM200c_max-lM200c_med, lM200c_med-lM200c_min= ", lM200c_med, lM200c_max-lM200c_med, lM200c_med-lM200c_min)
 
-    return(lMHalo_med, lMHalo_max-lMHalo_med, lMHalo_med-lMHalo_min)
+    return(lM200c_med, lM200c_max-lM200c_med, lM200c_med-lM200c_min)
     
 #This is a very rudimentary code and has been replaced.  
-def Behroozi2013_return_mhalo(lmstar_in,z):
+def Behroozi2013_return_mhalo(lMStar_in,z):
 
     logM_step = 0.05
     logM_lo = 8.0
@@ -68,11 +72,11 @@ def Behroozi2013_return_mhalo(lmstar_in,z):
     mstar = 10**(np.log10(eps*ml) + f - f0)
 
 
-    lmhalo_out = np.zeros(len(lmstar_in))
-    for j in range(len(lmstar_in)):
-        lmhalo_out[j] = np.interp(lmstar_in[j],np.log10(mstar),logM)
+    lmhalo_out = np.zeros(len(lMStar_in))
+    for j in range(len(lMStar_in)):
+        lmhalo_out[j] = np.interp(lMStar_in[j],np.log10(mstar),logM)
         #for i in range(len(logM)):
-            #if(np.log10(mstar[i])>=lmstar_in[j]):
+            #if(np.log10(mstar[i])>=lMStar_in[j]):
             #    lmhalo_out[j] = logM[i]
             #    lmhalo_out[j] = myutils.lMvir_to_lM200(lmhalo_out[j])
             #    #print("logM= ", logM[i],np.log10(mstar[i]))

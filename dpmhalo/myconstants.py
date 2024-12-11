@@ -1,12 +1,5 @@
 from colossus.cosmology import cosmology
-cosmo = cosmology.setCosmology('planck15')
-#my_cosmo = {'flat': True, 'H0': 67, 'Om0': 0.31, 'Ob0': 0.0490, 'sigma8': 0.8102, 'ns': 0.9665}
-#cosmo = cosmology.setCosmology('my_cosmo', **my_cosmo)
-##Cosmology "planck18" 
-###    flat = True, Om0 = 0.3111, Ode0 = 0.6888, Ob0 = 0.0490, H0 = 67.66, sigma8 = 0.8102, ns = 0.9665
-###    de_model = lambda, relspecies = True, Tcmb0 = 2.7255, Neff = 3.0460, powerlaw = False
-
-#print("cosmo= ", cosmo)
+cosmo = cosmology.setCosmology('planck18')
 
 hubbleparam = cosmo.H0/100. #0.7
 HubbleParam = cosmo.H0  #100.*hubbleparam

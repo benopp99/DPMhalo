@@ -5,7 +5,7 @@ from colossus.halo import concentration
 from colossus.halo import profile_nfw
 from colossus.cosmology import cosmology
 
-cosmo = cosmology.setCosmology('planck15')
+cosmo = cosmology.setCosmology('planck18')
 
 def return_DMrho_for_R(R,lM200c, redshift=0.0):
     M200c = 10**lM200c
