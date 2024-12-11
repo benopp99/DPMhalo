@@ -1,5 +1,7 @@
 include dpmhalo/lookuptables/*.npy
 include dpmhalo/scripts/*.py
+include dpmhalo/scripts/*.csh
+include dpmhalo/Data/*
 
 recursive-include *.py
 include README.md
