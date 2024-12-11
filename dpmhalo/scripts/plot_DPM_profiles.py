@@ -16,6 +16,11 @@ mpl.rc('ytick', labelsize=20)
 PlotDir = './'
 ModelDir = './'
 
+if(len(sys.argv) < 2):
+  print("Usage: plot_DPM_profiles.py 1) ls filename (i.e. .ls file)\n")
+  exit()
+
+
 cm = plt.get_cmap('turbo') 
 cmlo = 11.5
 cmhi = 15.0
