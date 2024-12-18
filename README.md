@@ -10,9 +10,7 @@ via pip:
 
 pip install dpmhalo
 
-
 #### NOTE OLD COMMAND HERE SHOULD BE OBSELETE: pip install git+https://github.com/benopp99/DPMhalo.git#egg=dpmhalo ####
-
 
 via git: 
 
@@ -37,3 +35,5 @@ This script takes 2 or 3 arguments.  Run it once first with no arguments (python
 For other scripts, go to:
 
 https://github.com/benopp99/DPM/tree/main/dpmhalo/scripts/
+
+There are a couple .csh shell scripts, and you need to do chmod a+x *.csh for them to become executables.  
