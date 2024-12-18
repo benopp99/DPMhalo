@@ -18,7 +18,7 @@ via git:
 
 git clone https://github.com/benopp99/DPMhalo.git
 
-cd dpmhalo
+cd DPMhalo
 
 python setup.py install
 
