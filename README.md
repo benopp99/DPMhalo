@@ -10,8 +10,6 @@ via pip:
 
 pip install dpmhalo
 
-#### NOTE OLD COMMAND HERE SHOULD BE OBSELETE: pip install git+https://github.com/benopp99/DPMhalo.git#egg=dpmhalo ####
-
 via git: 
 
 git clone https://github.com/benopp99/DPMhalo.git
