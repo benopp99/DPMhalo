@@ -8,8 +8,10 @@ The Descriptive Parametric Model for gaseous halos version 0.2 updated on Decemb
 
 via pip:
 
-pip install git+https://github.com/benopp99/DPMhalo.git#egg=dpmhalo
+pip install dpmhalo
 
+
+#### NOTE OLD COMMAND HERE SHOULD BE OBSELETE: pip install git+https://github.com/benopp99/DPMhalo.git#egg=dpmhalo ####
 
 
 via git: 
