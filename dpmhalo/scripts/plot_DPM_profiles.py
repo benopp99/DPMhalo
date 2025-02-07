@@ -152,7 +152,9 @@ for h in range(nhalos):
         continue
 
     redshift_DPM = redshift[0] # we need this later for data, because some data relations use E(z) scaling.  
-    
+
+    E_z = myutils.E(redshift)
+
     lR = np.log10(R)
 
     K = T/ne**(2/3.)*myc.keV_per_K
@@ -176,22 +178,22 @@ for h in range(nhalos):
     ax_LXsum.plot(lM200c[0], np.log10(LXsum),color=colour,marker=model_symbol,ms=15)
 
     ax_intkSZ_all.plot(R, np.log10(tauint_SZ), color=colour, lw=4,ls=lstyle,zorder=20-h)
-    ax_inttSZ_all.plot(R, np.log10(Yint_SZ), color=colour, lw=4,ls=lstyle,zorder=20-h)
+    ax_inttSZ_all.plot(R, np.log10(Yint_SZ) - 2/3.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h)
 
-    ax_Phot_all.plot(R, np.log10(Pe), color=colour, lw=4,ls=lstyle,zorder=20-h)
+    ax_Phot_all.plot(R, np.log10(Pe) - 8/3.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h)
     ax_Phot_norm.plot(R, np.log10(Pe_500), color=colour, lw=4,ls=lstyle,zorder=20-h)
 
     ax_Khot_norm.plot(R, np.log10(K_500), color=colour, lw=4,ls=lstyle,zorder=20-h)
     
-    ax_Thot_all.plot(R, np.log10(Pe/ne), color=colour, lw=4,ls=lstyle,zorder=20-h)
+    ax_Thot_all.plot(R, np.log10(Pe/ne) - 2/3.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h)
     
-    ax_nehot_all.plot(R, np.log10(ne)+(lM200c-12.0), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite
-    ax_nehot_norm.plot(R, np.log10(ne), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite 
+    ax_nehot_all.plot(R, np.log10(ne)+(lM200c-12.0) - 2.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite
+    ax_nehot_norm.plot(R, np.log10(ne) - 2.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite 
 
     ax_Zhot_all.plot(R, np.log10(Z), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite
 
-    ax_rhoDM.plot(R, np.log10(rho_DM), color=colour, lw=4,ls=lstyle,zorder=20-h)
-    
+    ax_rhoDM.plot(R, np.log10(rho_DM) - 2.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h)
+        
     Mcum = R*0.
     for i in range(len(R)):
         Mcum[i] = myutils.calc_spherical_mass(ne,lM200c[i],R,R[i],redshift[i])
@@ -239,6 +241,15 @@ for h in range(len(lM500c_Akino)):
 ax_fgas.plot(lM200c_Akino,fgas500_Akino, color='k', lw = 2, alpha=1.0, ls='--',zorder=30,label="Akino+2022")
 ax_fgas.plot(lM200c_Akino,fgas500_lo_Akino, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
 ax_fgas.plot(lM200c_Akino,fgas500_hi_Akino, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+
+lfR200c_Sun2009, ne_med_Sun2009, ne_lo_Sun2009, ne_hi_Sun2009 = data.Sun_2009_ne_Groups()
+lM200c_Sun2009 = 13.65 - np.log10(0.7) #Using lM500=13.5
+colour_Sun2009_ne_Groups = cm((lM200c_Sun2009-cmlo)/(cmhi-cmlo))
+ax_nehot_all.plot(10**lfR200c_Sun2009,np.log10(ne_med_Sun2009)+(lM200c_Sun2009-12.0), color=colour_Sun2009_ne_Groups, lw=2,alpha=1.0,ls='-',zorder=30,label="Sun+2009 $Gr$")
+ax_nehot_all.fill_between(10**lfR200c_Sun2009,np.log10(ne_lo_Sun2009)+(lM200c_Sun2009-12.0),np.log10(ne_hi_Sun2009)+(lM200c_Sun2009-12.0), color=colour_Sun2009_ne_Groups, alpha=0.2, zorder=30)
+
+ax_nehot_norm.plot(10**lfR200c_Sun2009,np.log10(ne_med_Sun2009), color=colour_Sun2009_ne_Groups, lw=2,alpha=1.0,ls='-',zorder=30,label="Sun+2009 $Gr$")
+ax_nehot_norm.fill_between(10**lfR200c_Sun2009,np.log10(ne_lo_Sun2009),np.log10(ne_hi_Sun2009), color=colour_Sun2009_ne_Groups, alpha=0.2, zorder=30)
 
 lM200c_Arnaud_plot = [15.0,14.5,14.0] #[15.16,14.66,14.16]
 for h in range(len(lM200c_Arnaud_plot)):
@@ -664,26 +675,35 @@ lM200c_plotR500c_frac = [13.5] #[12.0,13.5,15.0]
 fR500c = np.zeros(len(lM200c_plotR500c_frac))
 for i in range(len(lM200c_plotR500c_frac)):
     fR500c[i] = myutils.fR500c_to_fR200c(1.0,10**lM200c_plotR500c_frac[i],redshift[0])
-    
-ax_Phot_all.set_xscale('log')
+
+file_output_type = ".png"
+
+
+    ax_Phot_all.set_xscale('log')
 ax_Phot_all.set_xlim(10**lRlow,10**lRhigh)
-ax_Phot_all.set_ylim(0.0,6.7)
+ylo = -0.5
+yhi = 6.0
+ax_Phot_all.set_ylim(ylo,yhi)
 ax_Phot_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Phot_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Phot_all.set_xlabel('$r/R_{200}$',fontsize=24)
-ax_Phot_all.set_ylabel('log $P$ [cm$^{-3}$ K]',fontsize=24)
+ax_Phot_all.set_ylabel('log $P$ $E(z)^{-8/3}$ [cm$^{-3}$ K]',fontsize=24)
 ax_Phot_all.plot([1,1],[-10,100],color='k',lw=1,ls=':')
+#ax_Phot_all.text(0.90,(yhi-ylo)*0.95+ylo,r"$R_{200}$",rotation=90,color='black')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Phot_all.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_Phot_all.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 legend = ax_Phot_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_Phot_all.gca().add_artist(legend)
 ax_Phot_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Phot_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Phot_all.savefig(PlotDir + 'P_hot_all.' + lsfilename + '.png')
+fig_Phot_all.savefig(PlotDir + 'P_hot_all.' + lsfilename + file_output_type)
 
 ax_Phot_norm.set_xscale('log')
 ax_Phot_norm.set_xlim(10**lRlow,10**lRhigh)
-ax_Phot_norm.set_ylim(-3.0,3.0)
+ylo = -3.0
+yhi = 2.0
+ax_Phot_norm.set_ylim(ylo,yhi)
 ax_Phot_norm.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Phot_norm.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Phot_norm.set_xlabel('$r/R_{200}$',fontsize=24)
@@ -691,7 +711,8 @@ ax_Phot_norm.set_ylabel('log $P/P_{500}$',fontsize=24)
 ax_Phot_norm.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Phot_norm.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
-ax_Phot_norm.plot([-10,100],[0,0],color='k',lw=1,ls=':')
+    ax_Phot_norm.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
+#ax_Phot_norm.plot([-10,100],[0,0],color='k',lw=1,ls=':')
 if(docolorbar):
     cax = fig_Phot_norm.add_axes([0.85,0.42,0.03,0.52])
     sm = plt.cm.ScalarMappable(cmap=cm, norm=mpl.colors.Normalize(vmin=cmlo, vmax=cmhi))
@@ -703,19 +724,22 @@ else:
     fig_Phot_norm.gca().add_artist(legend)    
 ax_Phot_norm.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Phot_norm.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Phot_norm.savefig(PlotDir + 'P_hot_norm.' + lsfilename + '.png')
+fig_Phot_norm.savefig(PlotDir + 'P_hot_norm.' + lsfilename + file_output_type)
 
 ax_nehot_norm.set_xscale('log')
 ax_nehot_norm.set_xlim(10**lRlow,10**lRhigh)
-ax_nehot_norm.set_ylim(-5.0,-1.0)
+ylo = -5.0
+yhi = -1.5
+ax_nehot_norm.set_ylim(ylo,yhi)
 ax_nehot_norm.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_nehot_norm.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_nehot_norm.set_xlabel('$r/R_{200}$',fontsize=24)
-ax_nehot_norm.set_ylabel('log $n_\mathrm{e}$ [cm$^{-3}$]',fontsize=24)
+ax_nehot_norm.set_ylabel('log $n_\mathrm{e}$ $E(z)^{-2}$ [cm$^{-3}$]',fontsize=24)
 ax_nehot_norm.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_nehot_norm.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
-if(docolorbar):
+    ax_nehot_norm.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
+if(docolorbar):    
     cax = fig_nehot_norm.add_axes([0.85,0.42,0.03,0.52]) 
     sm = plt.cm.ScalarMappable(cmap=cm, norm=mpl.colors.Normalize(vmin=cmlo, vmax=cmhi))
     cb = fig_nehot_norm.colorbar(sm,cax=cax)
@@ -726,29 +750,33 @@ else:
     fig_nehot_norm.gca().add_artist(legend)
 ax_nehot_norm.legend(loc="lower right", ncol=1,fontsize=16)
 fig_nehot_norm.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_nehot_norm.savefig(PlotDir + 'ne_hot_norm.' + lsfilename + '.png')
+fig_nehot_norm.savefig(PlotDir + 'ne_hot_norm.' + lsfilename + file_output_type)
 
 ax_nehot_all.set_xscale('log')
 ax_nehot_all.set_xlim(10**lRlow,10**lRhigh)
-ax_nehot_all.set_ylim(-5.0,4.0)
-###ax_nehot_all.set_ylim(-5.5,-1.0)
+ylo = -5.0
+yhi = 4.0
+ax_nehot_all.set_ylim(ylo,yhi)
 ax_nehot_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_nehot_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_nehot_all.set_xlabel('$r/R_{200}$',fontsize=24)
-ax_nehot_all.set_ylabel(r'log $n_\mathrm{e} \times M_{200}/10^{12}$ [cm$^{-3}$]',fontsize=24)
+ax_nehot_all.set_ylabel(r'log $n_\mathrm{e} \times M_{200}/10^{12}$ $E(z)^{-2}$ [cm$^{-3}$]',fontsize=24)
 ###ax_nehot_all.set_ylabel(r'log $n_\mathrm{e}$ [cm$^{-3}$]',fontsize=24)
 ax_nehot_all.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_nehot_all.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_nehot_all.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 legend = ax_nehot_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_nehot_all.gca().add_artist(legend)
 ax_nehot_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_nehot_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_nehot_all.savefig(PlotDir + 'ne_hot_all.' + lsfilename + '.png')
+fig_nehot_all.savefig(PlotDir + 'ne_hot_all.' + lsfilename + file_output_type)
 
 ax_Khot_norm.set_xscale('log')
 ax_Khot_norm.set_xlim(10**lRlow,10**lRhigh)
-ax_Khot_norm.set_ylim(-1.5,1.2)
+ylo = -1.5
+yhi = 1.2
+ax_Khot_norm.set_ylim(ylo,yhi)
 ax_Khot_norm.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Khot_norm.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Khot_norm.set_xlabel('$r/R_{200}$',fontsize=24)
@@ -756,17 +784,20 @@ ax_Khot_norm.set_ylabel('log $K/K_{500}$',fontsize=24)
 ax_Khot_norm.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Khot_norm.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
-ax_Khot_norm.plot([-10,100],[0,0],color='k',lw=1,ls=':')
+    ax_Khot_norm.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
+#ax_Khot_norm.plot([-10,100],[0,0],color='k',lw=1,ls=':')
 legend = ax_Khot_norm.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_Khot_norm.gca().add_artist(legend)
 ax_Khot_norm.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Khot_norm.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Khot_norm.savefig(PlotDir + 'K_hot_norm.' + lsfilename + '.png')
+fig_Khot_norm.savefig(PlotDir + 'K_hot_norm.' + lsfilename + file_output_type)
 
 
 ax_Mcumhot_all.set_xscale('log')
 ax_Mcumhot_all.set_xlim(10**lRlow,10**lRhigh)
-ax_Mcumhot_all.set_ylim(0,0.25)
+ylo = 0
+yhi = 0.25
+ax_Mcumhot_all.set_ylim(ylo,yhi)
 ax_Mcumhot_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Mcumhot_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Mcumhot_all.set_xlabel('$r/R_{200}$',fontsize=24)
@@ -774,16 +805,19 @@ ax_Mcumhot_all.set_ylabel(r'$M_\mathrm{gas}(<r)/M_{200}$',fontsize=24)
 ax_Mcumhot_all.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Mcumhot_all.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_Mcumhot_all.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 ax_Mcumhot_all.plot([-10,100],[0.16,0.16],color='gray',lw=2,ls='--')
 legend = ax_Mcumhot_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_Mcumhot_all.gca().add_artist(legend)
 ax_Mcumhot_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Mcumhot_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Mcumhot_all.savefig(PlotDir + 'Mcum_hot_all.' + lsfilename + '.png')
+fig_Mcumhot_all.savefig(PlotDir + 'Mcum_hot_all.' + lsfilename + file_output_type)
 
 ax_Zhot_all.set_xscale('log')
 ax_Zhot_all.set_xlim(10**lRlow,10**lRhigh)
-ax_Zhot_all.set_ylim(-1.3,0.5)
+ylo = -1.2
+yhi = 0.0
+ax_Zhot_all.set_ylim(ylo,yhi)
 ax_Zhot_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Zhot_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Zhot_all.set_xlabel('$r/R_{200}$',fontsize=24)
@@ -791,32 +825,38 @@ ax_Zhot_all.set_ylabel(r'log $Z/Z_{\odot}$',fontsize=24)
 ax_Zhot_all.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Zhot_all.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_Zhot_all.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 legend = ax_Zhot_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_Zhot_all.gca().add_artist(legend)
 ax_Zhot_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Zhot_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Zhot_all.savefig(PlotDir + 'Z_hot_all.' + lsfilename + '.png')
+fig_Zhot_all.savefig(PlotDir + 'Z_hot_all.' + lsfilename + file_output_type)
 
 ax_Thot_all.set_xscale('log')
 ax_Thot_all.set_xlim(10**lRlow,10**lRhigh)
-ax_Thot_all.set_ylim(4.0,8.0)
+ylo = 4.0
+yhi = 8.0
+ax_Thot_all.set_ylim(ylo,yhi)
 ax_Thot_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_Thot_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_Thot_all.set_xlabel('$r/R_{200}$',fontsize=24)
-ax_Thot_all.set_ylabel('log $T$ [K]',fontsize=24)
+ax_Thot_all.set_ylabel('log $T$ $E(z)^{-2/3}$ [K]',fontsize=24)
 ax_Thot_all.plot([1,1],[-10,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_Thot_all.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_Thot_all.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 legend = ax_Thot_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_Thot_all.gca().add_artist(legend)
 #ax_Thot_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_Thot_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_Thot_all.savefig(PlotDir + 'T_hot_all.' + lsfilename + '.png')
+fig_Thot_all.savefig(PlotDir + 'T_hot_all.' + lsfilename + file_output_type)
 
 
 ax_NOVI_all.set_xscale('log')
 ax_NOVI_all.set_xlim(10**lRlow,10**lRhigh)
-ax_NOVI_all.set_ylim(12,17)
+ylo = 12.0
+yhi = 17.0
+ax_NOVI_all.set_ylim(ylo,yhi)
 ax_NOVI_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_NOVI_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_NOVI_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -825,11 +865,13 @@ legend = ax_NOVI_all.legend(label_object, label_array, loc='upper right',fontsiz
 fig_NOVI_all.gca().add_artist(legend)
 ax_NOVI_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_NOVI_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_NOVI_all.savefig(PlotDir + 'NOVI_all.' + lsfilename + '.png')
+fig_NOVI_all.savefig(PlotDir + 'NOVI_all.' + lsfilename + file_output_type)
 
 ax_NOVII_all.set_xscale('log')
 ax_NOVII_all.set_xlim(10**lRlow,10**lRhigh)
-ax_NOVII_all.set_ylim(12,17)
+ylo = 12.0
+yhi = 17.0
+ax_NOVII_all.set_ylim(ylo,yhi)
 ax_NOVII_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_NOVII_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_NOVII_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -838,11 +880,13 @@ legend = ax_NOVII_all.legend(label_object, label_array, loc='upper right',fontsi
 fig_NOVII_all.gca().add_artist(legend)
 #ax_NOVII_all.legend(loc="center right", ncol=1,fontsize=16)
 fig_NOVII_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_NOVII_all.savefig(PlotDir + 'NOVII_all.' + lsfilename + '.png')
+fig_NOVII_all.savefig(PlotDir + 'NOVII_all.' + lsfilename + file_output_type)
 
 ax_NOVIII_all.set_xscale('log')
 ax_NOVIII_all.set_xlim(10**lRlow,10**lRhigh)
-ax_NOVIII_all.set_ylim(12,17)
+ylo = 12.0
+yhi = 17.0
+ax_NOVIII_all.set_ylim(ylo,yhi)
 ax_NOVIII_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_NOVIII_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_NOVIII_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -851,24 +895,28 @@ legend = ax_NOVIII_all.legend(label_object, label_array, loc='upper right',fonts
 fig_NOVIII_all.gca().add_artist(legend)
 #ax_NOVIII_all.legend(loc="center right", ncol=1,fontsize=16)
 fig_NOVIII_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_NOVIII_all.savefig(PlotDir + 'NOVIII_all.' + lsfilename + '.png')
+fig_NOVIII_all.savefig(PlotDir + 'NOVIII_all.' + lsfilename + file_output_type)
 
 ax_ySZ_all.set_xscale('log')
 ax_ySZ_all.set_xlim(10**lRlow,10**lRhigh)
-ax_ySZ_all.set_ylim(-10,-4)
+ylo = -10.0
+yhi = -4.0
+ax_ySZ_all.set_ylim(ylo,yhi)
 ax_ySZ_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_ySZ_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_ySZ_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
-ax_ySZ_all.set_ylabel('log $y$ [unitless]',fontsize=24)
+ax_ySZ_all.set_ylabel('log $y$ $E(z)^{-2}$ [unitless]',fontsize=24)
 legend = ax_ySZ_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_ySZ_all.gca().add_artist(legend)
 ax_ySZ_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_ySZ_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_ySZ_all.savefig(PlotDir + 'ySZ_all.' + lsfilename + '.png')
+fig_ySZ_all.savefig(PlotDir + 'ySZ_all.' + lsfilename + file_output_type)
 
 ax_DM_all.set_xscale('log')
 ax_DM_all.set_xlim(10**lRlow,10**lRhigh)
-ax_DM_all.set_ylim(0,4)
+ylo = 0.0
+yhi = 4.0
+ax_DM_all.set_ylim(ylo,yhi)
 ax_DM_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_DM_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_DM_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -877,11 +925,13 @@ legend = ax_DM_all.legend(label_object, label_array, loc='upper right',fontsize=
 fig_DM_all.gca().add_artist(legend)
 ax_DM_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_DM_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_DM_all.savefig(PlotDir + 'DM_all.' + lsfilename + '.png')
+fig_DM_all.savefig(PlotDir + 'DM_all.' + lsfilename + file_output_type)
 
 ax_intkSZ_all.set_xscale('log')
 ax_intkSZ_all.set_xlim(10**lRlow,10**lRhigh)
-ax_intkSZ_all.set_ylim(-2,6)
+ylo = -2.0
+yhi = 6.0
+ax_intkSZ_all.set_ylim(ylo,yhi)
 ax_intkSZ_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_intkSZ_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_intkSZ_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -890,24 +940,28 @@ legend = ax_intkSZ_all.legend(label_object, label_array, loc='upper right',fonts
 fig_intkSZ_all.gca().add_artist(legend)
 #ax_intkSZ_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_intkSZ_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_intkSZ_all.savefig(PlotDir + 'intkSZ_all.' + lsfilename + '.png')
+fig_intkSZ_all.savefig(PlotDir + 'intkSZ_all.' + lsfilename + file_output_type)
 
 ax_inttSZ_all.set_xscale('log')
 ax_inttSZ_all.set_xlim(10**lRlow,10**lRhigh)
-ax_inttSZ_all.set_ylim(-6,4)
+ylo = -6.0
+yhi = 4.0
+ax_inttSZ_all.set_ylim(ylo,yhi)
 ax_inttSZ_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_inttSZ_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_inttSZ_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
-ax_inttSZ_all.set_ylabel('log $Y_\mathrm{Int}$ [kpc$^2$]',fontsize=24)
+ax_inttSZ_all.set_ylabel('log $Y_\mathrm{Int}$ $E(z)^{-2/3}$ [kpc$^2$]',fontsize=24)
 legend = ax_inttSZ_all.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_inttSZ_all.gca().add_artist(legend)
 #ax_inttSZ_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_inttSZ_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_inttSZ_all.savefig(PlotDir + 'inttSZ_all.' + lsfilename + '.png')
+fig_inttSZ_all.savefig(PlotDir + 'inttSZ_all.' + lsfilename + file_output_type)
 
 ax_SoftXray_all.set_xscale('log')
 ax_SoftXray_all.set_xlim(10**lRlow,10**lRhigh)
-ax_SoftXray_all.set_ylim(34,39)
+ylo = 34.0
+yhi = 39.0
+ax_SoftXray_all.set_ylim(ylo,yhi)
 ax_SoftXray_all.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_SoftXray_all.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_SoftXray_all.set_xlabel('$r_{\perp}/R_{200}$',fontsize=24)
@@ -916,7 +970,7 @@ legend = ax_SoftXray_all.legend(label_object, label_array, loc='upper right',fon
 fig_SoftXray_all.gca().add_artist(legend)
 ax_SoftXray_all.legend(loc="lower right", ncol=1,fontsize=16)
 fig_SoftXray_all.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_SoftXray_all.savefig(PlotDir + 'SoftXray_all.' + lsfilename + '.png')
+fig_SoftXray_all.savefig(PlotDir + 'SoftXray_all.' + lsfilename + file_output_type)
 
 ax_LXsum.set_xlim(11.3, 15.2)
 ax_LXsum.set_ylim(38,45.6)
@@ -928,7 +982,7 @@ fig_LXsum.gca().add_artist(legend)
 ax_LXsum.legend(loc="upper left", ncol=1,fontsize=16)
 ax_LXsum.grid(color='grey', linestyle='-', linewidth=1)
 fig_LXsum.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_LXsum.savefig(PlotDir + 'LXsum.' + lsfilename + '.png')
+fig_LXsum.savefig(PlotDir + 'LXsum.' + lsfilename + file_output_type)
 
 ax_fgas.set_xlim(11.3, 15.2)
 ax_fgas.set_ylim(0.0,0.18)
@@ -940,21 +994,24 @@ fig_fgas.gca().add_artist(legend)
 ax_fgas.legend(loc="center left", ncol=1,fontsize=16)
 ax_fgas.grid(color='grey', linestyle='-', linewidth=1)
 fig_fgas.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_fgas.savefig(PlotDir + 'fgas.' + lsfilename + '.png')
+fig_fgas.savefig(PlotDir + 'fgas.' + lsfilename + file_output_type)
 
 ax_rhoDM.set_xscale('log')
 ax_rhoDM.set_xlim(10**lRlow,10**lRhigh)
-ax_rhoDM.set_ylim(-29,-23.5)
-###ax_rhoDM.set_ylim(-5.5,-1.0)
+ylo = -29.0
+yhi = -23.5
+ax_rhoDM.set_ylim(ylo,yhi)
 ax_rhoDM.set_xticks([0.03,0.1,0.3,1.0,2.0])
 ax_rhoDM.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 ax_rhoDM.set_xlabel('$r/R_{200}$',fontsize=24)
-ax_rhoDM.set_ylabel(r'log $\rho_\mathrm{DM}$ [g cm$^{-3}$]',fontsize=24)
+ax_rhoDM.set_ylabel(r'log $\rho_\mathrm{DM}$ $E(z)^{-2}$ [g cm$^{-3}$]',fontsize=24)
 ax_rhoDM.plot([1,1],[-100,100],color='k',lw=1,ls=':')
 for i in range(len(lM200c_plotR500c_frac)):
     ax_rhoDM.plot([fR500c[i],fR500c[i]],[-100,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_rhoDM.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
 legend = ax_rhoDM.legend(label_object, label_array, loc='upper right',fontsize=16)
 fig_rhoDM.gca().add_artist(legend)
 ax_rhoDM.legend(loc="lower right", ncol=1,fontsize=16)
 fig_rhoDM.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
-fig_rhoDM.savefig(PlotDir + 'rhoDM.' + lsfilename + '.png')
+fig_rhoDM.savefig(PlotDir + 'rhoDM.' + lsfilename + file_output_type)
+
