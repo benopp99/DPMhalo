@@ -24,7 +24,7 @@ def returnmodelparams(modelID):
         betane = 0.0
         gammane = 2. 
         sigmalogne = 0.01
-        Znorm12 = 0.2
+        Znorm12 = 0.3
         alphatrZ12 = 0.5
         alphahiZ12 = 0.7
         alphaloZ12 = 0.0
@@ -57,7 +57,7 @@ def returnmodelparams(modelID):
         betane = 0.36
         gammane = 2. 
         sigmalogne = 0.01
-        Znorm12 = 0.2
+        Znorm12 = 0.3
         alphatrZ12 = 0.5
         alphahiZ12 = 0.7
         alphaloZ12 = 0.0
@@ -90,7 +90,7 @@ def returnmodelparams(modelID):
         betane = 0.36
         gammane = 2. 
         sigmalogne = 0.01
-        Znorm12 = 0.2
+        Znorm12 = 0.3
         alphatrZ12 = 0.5
         alphahiZ12 = 0.7
         alphaloZ12 = 0.0
