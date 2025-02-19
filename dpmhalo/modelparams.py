@@ -3,7 +3,7 @@
 def returnmodelparams(modelID):
 
     if(modelID.startswith("ClusterBased5") | modelID.startswith("Model1")):
-        Pnorm12 = 4.4e+02
+        Pnorm12 = 4.093e+02
         alphatrP12 = 1.3
         alphahiP12 = 4.1
         alphaloP12 = 0.3
@@ -13,7 +13,7 @@ def returnmodelparams(modelID):
         alphaloPMvar = 0.0
         betaP = 2/3.
         gammaP = 8/3.
-        nenorm12 = 6.3e-04
+        nenorm12 = 5.86e-04
         alphatrne12 = 1.9
         alphahine12 = 2.7
         alphalone12 = 1.0
@@ -36,7 +36,7 @@ def returnmodelparams(modelID):
         gammaZ = 0.0
         
     if(modelID.startswith("ClusterScaled5") | modelID.startswith("Model2")):
-        Pnorm12 = 1.24e+02
+        Pnorm12 = 1.1535e+02
         alphatrP12 = 1.3
         alphahiP12 = 4.1
         alphaloP12 = 0.3
@@ -46,7 +46,7 @@ def returnmodelparams(modelID):
         alphaloPMvar = 0.0
         betaP = 0.85
         gammaP = 8/3.
-        nenorm12 = 5.24e-05
+        nenorm12 = 4.874e-05
         alphatrne12 = 1.9
         alphahine12 = 2.7
         alphalone12 = 1.0
@@ -69,7 +69,7 @@ def returnmodelparams(modelID):
         gammaZ = 0.0
  
     if(modelID.startswith("ClusterGroupScaled5") | modelID.startswith("Model3")):
-        Pnorm12 = 7.6e+01
+        Pnorm12 = 7.07e+01
         alphatrP12 = 0.2
         alphahiP12 = 2.0
         alphaloP12 = -0.6
@@ -79,7 +79,7 @@ def returnmodelparams(modelID):
         alphaloPMvar = 0.3
         betaP = 0.92
         gammaP = 8/3. 
-        nenorm12 = 5.24e-05
+        nenorm12 = 4.874e-05
         alphatrne12 = 0.45
         alphahine12 = 0.50
         alphalone12 = 0.40
