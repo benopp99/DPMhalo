@@ -1,6 +1,6 @@
 #from dpm import *
 
-__version__ = "0.2"
+__version__ = "1.0"
 __author__ = 'Benjamin D. Oppenheimer'
 __credits__ = 'University of Colorado, Boulder'
 
