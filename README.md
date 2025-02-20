@@ -1,6 +1,6 @@
 # DPMhalo
 
-The Descriptive Parametric Model for gaseous halos version 1.0.0 updated on February 19, 2025
+The Descriptive Parametric Model for gaseous halos version 1.1 updated on February 19, 2025
 
 # Installation
 
