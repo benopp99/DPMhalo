@@ -1,7 +1,7 @@
 #from dpm import *
 
-__version__ = "1.0.0"
-__author__ = 'Benjamin Darwin Oppenheimer'
+__version__ = "1.1"
+__author__ = 'Benjamin D. Oppenheimer'
 __credits__ = 'University of Colorado, Boulder'
 
 
