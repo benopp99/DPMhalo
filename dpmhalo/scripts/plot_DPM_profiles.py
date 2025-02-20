@@ -679,7 +679,7 @@ for i in range(len(lM200c_plotR500c_frac)):
 file_output_type = ".png"
 
 
-    ax_Phot_all.set_xscale('log')
+ax_Phot_all.set_xscale('log')
 ax_Phot_all.set_xlim(10**lRlow,10**lRhigh)
 ylo = -0.5
 yhi = 6.0
