@@ -26,7 +26,7 @@ jobs:
           pip install setuptools
       - name: Build package
         run: |
-          python setup.py sdist
+          python setup.py
       - name: Publish distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
