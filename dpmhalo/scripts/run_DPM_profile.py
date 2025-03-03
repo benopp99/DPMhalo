@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 import dpmhalo
-from dpmhalo import myutils,darkmatter,modelprofiles
+from dpmhalo import myutils,darkmatter,modelprofiles 
 
 ModelDir = './'
 
