@@ -5,7 +5,7 @@ from setuptools.extension import Extension
 
 
 setup(name='DPMhalo',
-      version='1.1',
+      version='1.1.1',
       description='The Descriptive Parametric Model for gaseous halos',
       url='https://github.com/benopp99/DPMhalo',
       author='Benjamin D. Oppenheimer',
