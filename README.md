@@ -35,3 +35,10 @@ For other scripts, go to:
 https://github.com/benopp99/DPM/tree/main/dpmhalo/scripts/
 
 There are a couple .csh shell scripts, and you need to do chmod a+x *.csh for them to become executables.  
+
+# Additional DPMhalo-generated Plots
+
+
+Please go to this website for additional DPMhalo-generated plots:  
+
+https://casa.colorado.edu/~boppenheimer/ParamModel_main.html
