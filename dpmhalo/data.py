@@ -1,16 +1,16 @@
 import numpy as np
 from astropy import units as u
 from astropy import constants as const
-from dpmhalo import myconstants as myc
 from dpmhalo import smhm 
 from dpmhalo import myutils
+from dpmhalo import myconstants as myc
 import pandas as pd
 import os
 
 rootdir = os.path.dirname(__file__)
 DataDir = rootdir + '/Data/'
 
-def Akino_2022_fgas_fit_z0(lM200c,redshift):
+def Akino2022_fgas_fit_z0(lM200c,redshift):
 
     E_z = myutils.E(redshift) # I followed equations but I'm not sure if this evolves correctly, but we are only showing at z=0.  
 
@@ -128,7 +128,7 @@ def Sun_2011_P(cluster=False, return_P500=False):
     #lRfrac_200 = np.log10(myutils.R500_to_R200(10**lRfrac))
     lRfrac_200 = np.log10(myutils.fR500c_to_fR200c(10**lRfrac,M500c_Sun2011))
 
-    redshift_Sun2011 = 0.033 # Not used for plotting since normalized to E(z)^-8/3
+    redshift_Sun2011 = 0.033 # Not used since normalized to E(z)^-8/3
     
     lM200c_Sun2011 = myutils.lM500c_to_lM200c(np.log10(M500c_Sun2011))
     
@@ -147,7 +147,7 @@ def Sun_2009_ne_Groups():
 
     M500c_Sun2009 = 5e+13/0.7
 
-    redshift_Sun2009 = 0.033 # Not used for plotting, since normalized to E(z)^-2
+    redshift_Sun2009 = 0.033 # Not used, since normalized to E(z)^-2
     lRfrac, lne_med, lne_lo, lne_hi = np.loadtxt("%s/Sun2009_density.groups.dat"%DataDir,usecols=(0,1,2,3),unpack=True)
 
     lRfrac_200 = np.log10(myutils.fR500c_to_fR200c(10**lRfrac,M500c_Sun2009))
@@ -177,7 +177,7 @@ def Lovisari_2015_M500_LX():
 
     return(lM500_L15, lLX_L15)
 
-def Akino_2022_M500_LX(lM200c,redshift):
+def Akino2022_M500_LX(lM200c,redshift):
 
     
     E_z = myutils.E(redshift) # Evolution appears to agree with DPM redshift evolution.  
@@ -209,7 +209,7 @@ def Akino_2022_M500_LX(lM200c,redshift):
 
 
 
-def McDonald_2017_ne_MH145_z0(lM200c,lRfrac,R200c_kpc,redshift):
+def McDonald2017_ne_MH145_z0(lM200c,lRfrac,R200c_kpc,redshift):
 
     ###R500c_kpc = myutils.R200_to_R500(R200c_kpc)
     R500c_kpc = myutils.fR200c_to_fR500c(R200c_kpc, lM200c)
@@ -259,11 +259,16 @@ def Pratt_2021_tSZ():
 
 def Bregman_2022_tSZ():
 
+    # This uses median and assumes Rvir = R200.  
+    #R200_scale_data, ySZ_med, ySZ_err = np.loadtxt("%s/Bregman_2022-updated.LStar_stack.dat"%DataDir ,usecols=(1,3,5),delimiter=',',unpack=True)
+    #R_kpc, ySZ_med, ySZ_medpluserr = np.loadtxt("%s/Bregman_2022.LStar_stack.readoff.dat"%DataDir ,usecols=(0,1,2),unpack=True)
     R_kpc, ySZ_med, ySZ_errneg, ySZ_errpos = np.loadtxt("%s/NoN891_wbs_radial_shiftedBetaP2020_bootstrap_Jan2021.txt"%DataDir, usecols=(0,1,2,3),unpack=True)
     
     ySZ_med *= 1.90 # 10/3/24- erratum
     ySZ_errneg *= 1.90 # 10/3/24- erratum 
     ySZ_errpos *= 1.90 # 10/3/24- erratum 
+
+    #ySZ_err = ySZ_medpluserr-ySZ_med
 
     return(R_kpc,ySZ_med,ySZ_errpos,ySZ_errneg)
 
@@ -307,9 +312,13 @@ def Schaan_2021_kSZ_CMASS(muK=True):
 def Lovisari_2019_Z(combined=False):
 
     M500c_Lovisari_2019 = 10**13.55
-    R500_lo_data, R500_hi_data, Z_relax_data, sig_relax_data, Z_dist_data, sig_dist_data = np.loadtxt("%s/Lovisari_2019.Groups_Z.dat"%DataDir, usecols=(0,1,2,3,4,5),unpack=True) # Metallicities are in Asplund abundances.  
+    R500_lo_data, R500_hi_data, Z_relax_data, sig_relax_data, Z_dist_data, sig_dist_data = np.loadtxt("%s/Lovisari_2019.Groups_Z.dat"%DataDir, usecols=(0,1,2,3,4,5),unpack=True)
 
+    # As of 1/30/25, we are normalizing to Asplund abundances.  
+    #Z_relax_data *= myc.Z_Solar_Asplund/myc.Z_Solar_Anders # normalize to Anders & Grevesse 1989 since in Asplund 2009
+    #Z_dist_data *= myc.Z_Solar_Asplund/myc.Z_Solar_Anders # normalize to Anders & Grevesse 1989 since in Asplund 2009
     
+    ###R200_scale_data = myutils.R500_to_R200((R500_hi_data+R500_lo_data)/2.)
     R200_scale_data = myutils.fR500c_to_fR200c((R500_hi_data+R500_lo_data)/2.,M500c_Lovisari_2019)
 
     if(combined is True):
@@ -327,8 +336,8 @@ def Ghizzardi_2021_Z():
     ###R200_scale_data = myutils.R500_to_R200(R500_scale_data)
     R200_scale_data = myutils.fR500c_to_fR200c(R500c_scale_data,M500c_Ghizzardi_2021)
 
-    ZFe_med_data *= 10**7.51/10**7.50 # Normalize to Asplund (very minor)  
-    ZFe_err_data *= 10**7.51/10**7.50 # Normalize to Asplund (very minor) 
+    ZFe_med_data *= 10**7.51/10**7.50
+    ZFe_err_data *= 10**7.51/10**7.50
 
     return(R200_scale_data,ZFe_med_data,ZFe_err_data)
 

@@ -163,22 +163,47 @@ def convert_K_to_K500(K, lM200c,redshift, return_only_K500=False):
     else:
         return(K/K_500c)
 
-    
-def calc_spherical_mass(ne,lM_200,R,R_outer,redshift):
+def calc_spherical_mass(density,lM_200,R,R_outer,redshift,ne=True):
 
     R200c_cm = R200c_from_lM200c_in_cm(lM_200,redshift)
 
     M_sum = 0.0
     r_cm = R * R200c_cm
     r_outer_cm = R_outer*R200c_cm
-    
+
+    if(ne): # Electron density in 1/cm^3.  
+        density_multiple = const.m_p.to('g').value/myc.ne_to_nH/myc.XH
+    else:
+        density_multiple = 1.
+        
     for i in range(len(r_cm)):
+        #if(i>0): print("r_cm[i],r_cm[i-1],r_outer_cm=",r_cm[i],r_cm[i-1],r_outer_cm)
         if((i>0) & (r_cm[i]<r_outer_cm)):
-            M_sum += 4*np.pi/3.*(r_cm[i]**3-r_cm[i-1]**3)*(ne[i]+ne[i-1])/2.*const.m_p.to('g').value/myc.ne_to_nH/myc.XH
-        if((r_cm[i]>r_outer_cm) & (r_cm[i-1]<r_outer_cm)):
-            ne_200 = 10**(np.log10(ne[i-1]) + (np.log10(ne[i])-np.log10(ne[i-1]))*(r_outer_cm-r_cm[i-1])/(r_cm[i]-r_cm[i-1]))
+            M_sum += 4*np.pi/3.*(r_cm[i]**3-r_cm[i-1]**3)*10**((np.log10(density[i])+np.log10(density[i-1]))/2.)*density_multiple
+            #print("i, density[i], density[i-1], R[i], R[i-1],r_cm[i]/R200c_cm,r_cm[i-1]/R200c_cm= ", i, density[i], density[i-1],R[i],R[i-1],r_cm[i]/R200c_cm,r_cm[i-1]/R200c_cm)
+        if((r_cm[i]>=r_outer_cm) & (r_cm[i-1]<r_outer_cm)):
+            #print("ENTERING FINAL SUM")
+            density_outer = 10**(np.log10(density[i-1]) + (np.log10(density[i])-np.log10(density[i-1]))*(r_outer_cm-r_cm[i-1])/(r_cm[i]-r_cm[i-1]))
             M_sum_old = M_sum
-            M_sum += 4*np.pi/3.*((r_outer_cm)**3-r_cm[i-1]**3)*(ne_200+ne[i-1])/2.*const.m_p.to('g').value/myc.ne_to_nH/myc.XH
+            M_sum += 4*np.pi/3.*((r_outer_cm)**3-r_cm[i-1]**3)*10**((np.log10(density_outer)+np.log10(density[i-1]))/2.)*density_multiple
+            #print("i,density_outer, density[i-1], R[i], R[i-1],r_outer_cm/R200c_cm,r_cm[i-1]/R200c_cm= ", i, density_outer, density[i-1],R[i],R[i-1],r_outer_cm/R200c_cm,r_cm[i-1]/R200c_cm)
 
     return(M_sum )
 
+def calc_HSE(P,ne,Mcum,R,lM_200,redshift):
+
+    R200c_cm = R200c_from_lM200c_in_cm(lM_200,redshift)
+    r_cm = R * R200c_cm
+
+    dPdr = R*0.
+    grho = R*0.
+    for i in range(len(r_cm)):
+        if((i>0) & (i<len(r_cm)-1)):
+            dPdr[i] = -(P[i+1]-P[i-1])*const.k_B.to('g*cm**2*s**-2*K**-1').value/myc.ne_to_nH/myc.XH/myc.mu/(r_cm[i+1]-r_cm[i-1]) 
+            grho[i] = const.G.to('cm**3*g**-1*s**-2').value*Mcum[i]/r_cm[i]**2*(ne[i]*const.m_p.to('g').value/myc.ne_to_nH/myc.XH)
+
+    #print("dPdr,grho,dPdr/grwho= ",dPdr,grho,dPdr/grho)
+
+    return(dPdr/grho)
+
+    

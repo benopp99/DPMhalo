@@ -166,7 +166,7 @@ class ModelMFlexGNFW:
     T = PT/ne
     nH = ne/myc.ne_to_nH ### check!!!
     
-    Ofrac = trident.calculate_ion_fraction(ion, nH, T, redshift)
+    Ofrac = trident.calculate_ion_fraction(ion, nH, T, redshift)[0]
 
     nO = nH*myc.nO_per_nH_Zsolar*Z*Ofrac
 
