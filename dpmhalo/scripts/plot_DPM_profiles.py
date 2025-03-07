@@ -13,6 +13,8 @@ from dpmhalo import myconstants as myc
 mpl.rc('xtick', labelsize=20) 
 mpl.rc('ytick', labelsize=20) 
 
+coloured_errorbars = False
+
 PlotDir = './'
 ModelDir = './'
 
@@ -103,6 +105,11 @@ ax_fgas = fig_fgas.add_subplot(111)
 fig_rhoDM = plt.figure(figsize=(xinches,yinches))
 ax_rhoDM = fig_rhoDM.add_subplot(111)
 
+fig_fb = plt.figure(figsize=(xinches,yinches))
+ax_fb = fig_fb.add_subplot(111)
+
+fig_HSE = plt.figure(figsize=(xinches,yinches))
+ax_HSE = fig_HSE.add_subplot(111)
 
 halolabel_array = []
 halolabel_object = []
@@ -114,8 +121,8 @@ for h in range(nhalos):
 
     radial_file = lsfile[h].split()[0]
     radial_file = ModelDir + radial_file
-    modellabel = lsfile[h].split()[1]
     halolabel = lsfile[h].split()[2]
+    modellabel = lsfile[h].split()[1]
     lstyle = lsfile[h].split()[4]
     halolabel_bool = int(lsfile[h].split()[5])
     modellabel_bool = int(lsfile[h].split()[6])
@@ -154,7 +161,7 @@ for h in range(nhalos):
     redshift_DPM = redshift[0] # we need this later for data, because some data relations use E(z) scaling.  
 
     E_z = myutils.E(redshift)
-
+    
     lR = np.log10(R)
 
     K = T/ne**(2/3.)*myc.keV_per_K
@@ -193,15 +200,32 @@ for h in range(nhalos):
     ax_Zhot_all.plot(R, np.log10(Z), color=colour, lw=4,ls=lstyle,zorder=20-h) #label=labelwrite
 
     ax_rhoDM.plot(R, np.log10(rho_DM) - 2.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h)
-        
-    Mcum = R*0.
+    
+    Mgascum = R*0.
+    fb = R*0.
+    DMcum = R*0.
     for i in range(len(R)):
-        Mcum[i] = myutils.calc_spherical_mass(ne,lM200c[i],R,R[i],redshift[i])
-        Mcum[i] /= (10**lM200c[i]*const.M_sun.cgs.value)
+        Mgascum[i] = myutils.calc_spherical_mass(ne,lM200c[i],R,R[i],redshift[i],ne=True)
+        DMcum[i] = myutils.calc_spherical_mass(rho_DM,lM200c[i],R,R[i],redshift[i],ne=False)
 
+    fb = Mgascum/DMcum*(myc.OmegaM-myc.Omegab)/myc.OmegaM
+    #print("Mgascum,Mcum,fb,R = ", np.log10(Mgascum/myc.M_solar_g),np.log10(DMcum/myc.M_solar_g/((myc.OmegaM-myc.Omegab)/myc.OmegaM)),fb,R)
+
+    Mgascum /= (10**lM200c[0]*const.M_sun.cgs.value)
+
+    HSE_ratio = myutils.calc_HSE(Pe,ne,(DMcum+Mgascum),R,lM200c[0],redshift[0])
+    
+    #print("Mcum,R = ", Mcum,R)
+    
     M200c_gas = myutils.calc_spherical_mass(ne,lM200c[0],R,1.0,redshift[0])
     M500c_gas = myutils.calc_spherical_mass(ne,lM200c[0],R,1/myutils.fR200c_to_fR500c(1.0,10**lM200c[0],redshift[0]),redshift[0])
     Mvir_gas = myutils.calc_spherical_mass(ne,lM200c[0],R,1/myutils.fR200c_to_fRvir(1.0,10**lM200c[0],redshift[0]),redshift[0])
+
+    M200c_int = myutils.calc_spherical_mass(rho_DM,lM200c[0],R,1.0,redshift[0],ne=False)
+    M500c_int = myutils.calc_spherical_mass(rho_DM,lM200c[0],R,1/myutils.fR200c_to_fR500c(1.0,10**lM200c[0],redshift[0]),redshift[0],ne=False)
+    
+    #print("myutil gas integrate R500/R200, M500= ",1/myutils.fR200c_to_fR500c(1.0,10**lM200c[0],redshift[0]),myutils.lM200c_to_lM500c(lM200c[0],redshift[0]))
+    #print("myutil gas integrate R500/R200, M500= ",1/myutils.fR200c_to_fRvir(1.0,10**lM200c[0],redshift[0]),myutils.lM200c_to_lMvir(lM200c[0],redshift[0]))
     
     fgas_200c = M200c_gas/(10**lM200c[0]*const.M_sun.cgs.value) #*myc.f_b)
     fgas_500c = M500c_gas/(10**(myutils.lM200c_to_lM500c(lM200c[0],redshift[0]))*const.M_sun.cgs.value) #*myc.f_b)
@@ -213,10 +237,14 @@ for h in range(nhalos):
         ax_fgas.plot(lM200c[0], fgas_200c,color=colour,marker=model_symbol,ls='',ms=15)
         ax_fgas.plot(lM200c[0], fgas_500c,color=colour,marker=model_symbol,fillstyle="none",ls='',ms=15)
         #ax_fgas.plot(lM200c[0], fgas_vir,color=colour,marker='D',ls='',ms=15)
-  
-    ax_Mcumhot_all.plot(R, Mcum, color=colour, lw=4,ls=lstyle,zorder=20-h) 
+
+    ax_fb.plot(R, fb, color=colour, lw=4,ls=lstyle,zorder=20-h) 
+
+    ax_HSE.plot(R, HSE_ratio, color=colour, lw=4,ls=lstyle,zorder=20-h) 
     
-    ax_ySZ_all.plot(R, np.log10(ySZ), color=colour, lw=4,ls=lstyle,zorder=20-h) 
+    ax_Mcumhot_all.plot(R, Mgascum, color=colour, lw=4,ls=lstyle,zorder=20-h) 
+    
+    ax_ySZ_all.plot(R, np.log10(ySZ) - 2.*np.log10(E_z), color=colour, lw=4,ls=lstyle,zorder=20-h) 
     ax_DM_all.plot(R, np.log10(DM), color=colour, lw=4,ls=lstyle,zorder=20-h) 
     ax_SoftXray_all.plot(R, np.log10(SoftXray)+42.98, color=colour, lw=4,ls=lstyle,zorder=20-h) 
 
@@ -225,25 +253,46 @@ for h in range(nhalos):
     ax_NOVIII_all.plot(R, np.log10(N_OVIII), color=colour, lw=4,ls=lstyle,zorder=20-h) 
 
 
-lM500c_Akino = [13.0,13.1,13.2,13.3,13.4,13.5,13.6,13.7,13.8,14.2,14.3,14.4,14.5,14.6,14.7,14.8,14.9,15.0]
-lM200c_Akino = []
-fgas500_Akino = []
-fgas500_lo_Akino = []
-fgas500_hi_Akino = []
-for h in range(len(lM500c_Akino)):
-    lM200c_hold = myutils.lM500c_to_lM200c(lM500c_Akino[h])
-    M500c_hold, fgas, fgas_lo, fgas_hi = data.Akino_2022_fgas_fit_z0(lM200c_hold,redshift_DPM)
-    lM200c_Akino.append(myutils.lM500c_to_lM200c(np.log10(M500c_hold)))
-    fgas500_Akino.append(fgas)
-    fgas500_lo_Akino.append(fgas_lo)
-    fgas500_hi_Akino.append(fgas_hi)
+#lM500c_Akino2022 = np.linspace(13.0,15.0,num=21)
+lM500c_Akino2022 = [13.0,13.1,13.2,13.3,13.4,13.5,13.6,13.7,13.8,13.9,14.0,14.1,14.2,14.3,14.4,14.5,14.6,14.7,14.8,14.9,15.0]
+lM200c_Akino2022 = []
+fgas500_Akino2022 = []
+fgas500_lo_Akino2022 = []
+fgas500_hi_Akino2022 = []
+redshift_Akino2022 = 0.1
+for h in range(len(lM500c_Akino2022)):
+    lM200c_hold = myutils.lM500c_to_lM200c(lM500c_Akino2022[h])
+    M500c_hold, fgas, fgas_lo, fgas_hi = data.Akino2022_fgas_fit_z0(lM200c_hold,redshift_DPM)
+    lM200c_Akino2022.append(myutils.lM500c_to_lM200c(np.log10(M500c_hold)))
+    fgas500_Akino2022.append(fgas)
+    fgas500_lo_Akino2022.append(fgas_lo)
+    fgas500_hi_Akino2022.append(fgas_hi)
 
-ax_fgas.plot(lM200c_Akino,fgas500_Akino, color='k', lw = 2, alpha=1.0, ls='--',zorder=30,label="Akino+2022")
-ax_fgas.plot(lM200c_Akino,fgas500_lo_Akino, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
-ax_fgas.plot(lM200c_Akino,fgas500_hi_Akino, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+ax_fgas.plot(lM200c_Akino2022,fgas500_Akino2022, color='k', lw = 2, alpha=1.0, ls='--',zorder=30,label="Akino+2022")
+ax_fgas.plot(lM200c_Akino2022,fgas500_lo_Akino2022, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+ax_fgas.plot(lM200c_Akino2022,fgas500_hi_Akino2022, color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+
+lR200c_Akino2022 = np.asarray(lM200c_Akino2022)*0.0+0.0
+
+lM200c_Akino2022 = []
+LX500_Akino2022 = []
+LX500_lo_Akino2022 = []
+LX500_hi_Akino2022 = []
+for h in range(len(lM500c_Akino2022)):
+    lM200c_hold = myutils.lM500c_to_lM200c(lM500c_Akino2022[h])
+    M500c_hold, LX, LX_lo, LX_hi = data.Akino2022_M500_LX(lM200c_hold,redshift_DPM)
+    lM200c_Akino2022.append(myutils.lM500c_to_lM200c(np.log10(M500c_hold)))          
+    LX500_Akino2022.append(LX)
+    LX500_lo_Akino2022.append(LX_lo)
+    LX500_hi_Akino2022.append(LX_hi)
+
+ax_LXsum.plot(lM200c_Akino2022,np.log10(LX500_Akino2022), color='k', lw = 2, alpha=1.0, ls='--',zorder=30,label="Akino+2022")
+ax_LXsum.plot(lM200c_Akino2022,np.log10(LX500_lo_Akino2022), color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+ax_LXsum.plot(lM200c_Akino2022,np.log10(LX500_hi_Akino2022), color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
 
 lfR200c_Sun2009, ne_med_Sun2009, ne_lo_Sun2009, ne_hi_Sun2009 = data.Sun_2009_ne_Groups()
 lM200c_Sun2009 = 13.65 - np.log10(0.7) #Using lM500=13.5
+redshift_Sun2009 = 0.033 
 colour_Sun2009_ne_Groups = cm((lM200c_Sun2009-cmlo)/(cmhi-cmlo))
 ax_nehot_all.plot(10**lfR200c_Sun2009,np.log10(ne_med_Sun2009)+(lM200c_Sun2009-12.0), color=colour_Sun2009_ne_Groups, lw=2,alpha=1.0,ls='-',zorder=30,label="Sun+2009 $Gr$")
 ax_nehot_all.fill_between(10**lfR200c_Sun2009,np.log10(ne_lo_Sun2009)+(lM200c_Sun2009-12.0),np.log10(ne_hi_Sun2009)+(lM200c_Sun2009-12.0), color=colour_Sun2009_ne_Groups, alpha=0.2, zorder=30)
@@ -251,6 +300,7 @@ ax_nehot_all.fill_between(10**lfR200c_Sun2009,np.log10(ne_lo_Sun2009)+(lM200c_Su
 ax_nehot_norm.plot(10**lfR200c_Sun2009,np.log10(ne_med_Sun2009), color=colour_Sun2009_ne_Groups, lw=2,alpha=1.0,ls='-',zorder=30,label="Sun+2009 $Gr$")
 ax_nehot_norm.fill_between(10**lfR200c_Sun2009,np.log10(ne_lo_Sun2009),np.log10(ne_hi_Sun2009), color=colour_Sun2009_ne_Groups, alpha=0.2, zorder=30)
 
+    
 lM200c_Arnaud_plot = [15.0,14.5,14.0] #[15.16,14.66,14.16]
 for h in range(len(lM200c_Arnaud_plot)):
     lR = np.linspace(-2.0,0.0,21)
@@ -276,7 +326,8 @@ ax_Phot_norm.plot(10**lR,np.log10(P500_med), color=colour_Sun2011_P_Groups, lw=2
 ax_Phot_norm.fill_between(10**lR,np.log10(P500_lo),np.log10(P500_hi), color=colour_Sun2011_P_Groups, alpha=0.2, zorder=30)        
 
 fR200c_Lovisari2015, ne_med_Lovisari2015, ne_lo_Lovisari2015, ne_hi_Lovisari2015 = data.Lovisari_2015_ne_Groups()
-lM200c_Lovisari2015 = 13.7 #An assumption, maybe needs to be higher based on M_500, I'm going to move to 13.7.  Note the 20 groups here have a median of M500 at about 4e+13, so that is 13.6 and at + 0.15, so 13.7 is fine.  
+lM200c_Lovisari2015 = 13.7 #An assumption, maybe needs to be higher based on M_500, I'm going to move to 13.7.  Note the 20 groups here have a median of M500 at about 4e+13, so that is 13.6 and at + 0.15, so 13.7 is fine.
+redshift_Lovisari2015 = 0.025 
 colour_Lovisari2015_ne_Groups = cm((lM200c_Lovisari2015-cmlo)/(cmhi-cmlo))
 ax_nehot_all.plot(fR200c_Lovisari2015,np.log10(ne_med_Lovisari2015)+(lM200c_Lovisari2015-12.0), color=colour_Lovisari2015_ne_Groups, lw=2,alpha=1.0,ls='-.',zorder=30,label="Lovisari+2015 $Gr$")
 ax_nehot_all.fill_between(fR200c_Lovisari2015,np.log10(ne_lo_Lovisari2015)+(lM200c_Lovisari2015-12.0),np.log10(ne_hi_Lovisari2015)+(lM200c_Lovisari2015-12.0), color=colour_Lovisari2015_ne_Groups, alpha=0.2, zorder=30)
@@ -291,27 +342,28 @@ ax_nehot_norm.fill_between(fR200c_Lovisari2015,np.log10(ne_lo_Lovisari2015),np.l
 ###ax_Mcumhot_all.plot(R_Lovisari2015, Mcum_Lovisari2015, color=colour_Lovisari2015_ne_Groups, lw=2,ls=':',alpha=1.0,zorder=30,label="Lovisari 2015 $Gr$")
 
 
-redshift_McDonald = 0.0
-R_200_MH145_kpc = 1.63e-02*(10**14.5*myc.hubbleparam)**0.333/myc.hubbleparam
+lM200c_McDonald2017 = 14.5
+redshift_McDonald2017 = 0.05
+R200c_MH145_kpc = 1.63e-02*(10**14.5*myc.hubbleparam)**0.333/myc.hubbleparam
 lR = np.linspace(-2.0,0.0,21)
-R_McDonald_MH145_cgs, ne_McDonald_MH145_cgs = data.McDonald_2017_ne_MH145_z0(14.5,lR,R_200_MH145_kpc,redshift_McDonald)
-colour_McDonald=cm((14.5-cmlo)/(cmhi-cmlo))
-ax_nehot_all.plot(R_McDonald_MH145_cgs/(R_200_MH145_kpc), np.log10(ne_McDonald_MH145_cgs)+(14.5-12.0), color=colour_McDonald, lw=2,alpha=1.0,ls=':',zorder=30,label="McDonald+2017 $Cl$")
-ax_nehot_norm.plot(R_McDonald_MH145_cgs/(R_200_MH145_kpc), np.log10(ne_McDonald_MH145_cgs), color=colour_McDonald, lw=2,alpha=1.0,ls=':',zorder=30,label="McDonald+2017 $Cl$")
+R_McDonald2017_MH145_cgs, ne_McDonald2017_MH145_cgs = data.McDonald2017_ne_MH145_z0(14.5,lR,R200c_MH145_kpc,redshift_McDonald2017)
+colour_McDonald2017=cm((14.5-cmlo)/(cmhi-cmlo))
+ax_nehot_all.plot(R_McDonald2017_MH145_cgs/(R200c_MH145_kpc), np.log10(ne_McDonald2017_MH145_cgs)+(14.5-12.0), color=colour_McDonald2017, lw=2,alpha=1.0,ls=':',zorder=30,label="McDonald+2017 $Cl$")
+ax_nehot_norm.plot(R_McDonald2017_MH145_cgs/(R200c_MH145_kpc), np.log10(ne_McDonald2017_MH145_cgs), color=colour_McDonald2017, lw=2,alpha=1.0,ls=':',zorder=30,label="McDonald+2017 $Cl$")
 
 #Not plotting McDonald cumulative mass.  
-Mcum_McDonald_MH145 = R_McDonald_MH145_cgs*0.
-R_McDonald_MH145_frac = R_McDonald_MH145_cgs/(R_200_MH145_kpc) #*myc.cm_per_kpc)
-redshift_McDonald = 0.0 # XXX- CHeck
-for i in range(len(R_McDonald_MH145_cgs)):
-    Mcum_McDonald_MH145[i] = myutils.calc_spherical_mass(ne_McDonald_MH145_cgs,14.5,R_McDonald_MH145_frac,R_McDonald_MH145_frac[i],redshift_McDonald)
-    Mcum_McDonald_MH145[i] /= (10**14.5*const.M_sun.cgs.value)
-    #ax_Mcumhot_all.plot(R_McDonald_MH145_frac, Mcum_McDonald_MH145, color=colour_McDonald, lw=2,ls=':',alpha=1.0,zorder=30,label="McDonald+2017 $Cl$")
+Mgascum_McDonald2017_MH145 = R_McDonald2017_MH145_cgs*0.
+R_McDonald2017_MH145_frac = R_McDonald2017_MH145_cgs/(R200c_MH145_kpc) #*myc.cm_per_kpc)
+for i in range(len(R_McDonald2017_MH145_cgs)):
+    Mgascum_McDonald2017_MH145[i] = myutils.calc_spherical_mass(ne_McDonald2017_MH145_cgs,14.5,R_McDonald2017_MH145_frac,R_McDonald2017_MH145_frac[i],redshift_McDonald2017)
+    Mgascum_McDonald2017_MH145[i] /= (10**14.5*const.M_sun.cgs.value)
+#ax_Mcumhot_all.plot(R_McDonald2017_MH145_frac, Mgascum_McDonald2017_MH145, color=colour_McDonald2017, lw=2,ls=':',alpha=1.0,zorder=30,label="McDonald+2017 $Cl$")
 
 lM200c_Ghirardini2019 = [14.9]
 redshift_Ghirardini2019 = [0.0]
 lM500c_Ghirardini2019 = myutils.lM200c_to_lM500c(lM200c_Ghirardini2019[0],redshift_Ghirardini2019[0])
 lR_500 = np.linspace(-2.0,0.3,24)
+#lR_Ghirardini2019 = np.log10(myutils.R500_to_R200(10**lR_500))
 lR_Ghirardini2019 = np.log10(myutils.fR500c_to_fR200c(10**lR_500,10**lM500c_Ghirardini2019,redshift_Ghirardini2019[0]))
 colour_Ghirardini2019=cm((lM200c_Ghirardini2019[0]-cmlo)/(cmhi-cmlo))
 Pe_Ghirardini2019_cgs = data.Ghirardini_2019_Pe_fit(lM200c_Ghirardini2019[0],lR_Ghirardini2019,redshift_Ghirardini2019[0])
@@ -323,19 +375,20 @@ lM200c_Ghirardini2019 = [14.9]
 redshift_Ghirardini2019 = [0.0]
 lM500c_Ghirardini2019 = myutils.lM200c_to_lM500c(lM200c_Ghirardini2019[0],redshift_Ghirardini2019[0])
 lR_500 = np.linspace(-2.0,0.3,24)
+#lR_Ghirardini2019 = np.log10(myutils.R500_to_R200(10**lR_500))
 lR_Ghirardini2019 = np.log10(myutils.fR500c_to_fR200c(10**lR_500,10**lM500c_Ghirardini2019,redshift_Ghirardini2019[0]))
 colour_Ghirardini2019=cm((lM200c_Ghirardini2019[0]-cmlo)/(cmhi-cmlo))
 ne_Ghirardini2019_cgs = data.Ghirardini_2019_ne_fit(lR_Ghirardini2019)
 ax_nehot_all.plot(10**lR_Ghirardini2019, np.log10(ne_Ghirardini2019_cgs)+(lM200c_Ghirardini2019[0]-12.0), color=colour_Ghirardini2019, lw=2,alpha=1.0,ls='--',zorder=30,label="Ghirardini+2019 $Cl$")
 ax_nehot_norm.plot(10**lR_Ghirardini2019, np.log10(ne_Ghirardini2019_cgs), color=colour_Ghirardini2019, lw=2,alpha=1.0,ls='--',zorder=30,label="Ghirardini+2019 $Cl$")
 
-Mcum_Ghirardini2019 = lR_Ghirardini2019*0.
+Mgascum_Ghirardini2019 = lR_Ghirardini2019*0.
 R_Ghirardini2019 = 10**lR_Ghirardini2019
 redshift_Ghirardini2019 = 0.0 
 for i in range(len(R_Ghirardini2019)):
-    Mcum_Ghirardini2019[i] = myutils.calc_spherical_mass(ne_Ghirardini2019_cgs,lM200c_Ghirardini2019[0],R_Ghirardini2019,R_Ghirardini2019[i],redshift_Ghirardini2019)
-    Mcum_Ghirardini2019[i] /= (10**lM200c_Ghirardini2019[0]*const.M_sun.cgs.value)
-ax_Mcumhot_all.plot(R_Ghirardini2019, Mcum_Ghirardini2019, color=colour_Ghirardini2019, lw=2,ls='--',alpha=1.0,zorder=30,label="Ghirardini+2019 $Cl$")
+    Mgascum_Ghirardini2019[i] = myutils.calc_spherical_mass(ne_Ghirardini2019_cgs,lM200c_Ghirardini2019[0],R_Ghirardini2019,R_Ghirardini2019[i],redshift_Ghirardini2019)
+    Mgascum_Ghirardini2019[i] /= (10**lM200c_Ghirardini2019[0]*const.M_sun.cgs.value)
+ax_Mcumhot_all.plot(R_Ghirardini2019, Mgascum_Ghirardini2019, color=colour_Ghirardini2019, lw=2,ls='--',alpha=1.0,zorder=30,label="Ghirardini+2019 $Cl$")
 
 
 lM200c_XGAP = [13.6, 13.9, 14.3]
@@ -351,6 +404,7 @@ for i in range(len(lM200c_XGAP)):
     lPelo_500_XGAP = np.log10(myutils.convert_Pe_to_Pe500(10**lPelo_XGAP,lM200c_XGAP[i],redshift_XGAP[i]))
     lPehi_500_XGAP = np.log10(myutils.convert_Pe_to_Pe500(10**lPehi_XGAP,lM200c_XGAP[i],redshift_XGAP[i]))
 
+    #print("lM200c_XGAP[i], R_XGAP, lPe_XGAP, lPelo_XGAP, lPehi_XGAP= ", lM200c_XGAP[i], R_XGAP, lPe_XGAP, lPelo_XGAP, lPehi_XGAP)
     if(i==0):
         ax_Phot_all.plot(R_XGAP, lPe_XGAP, color=colour_XGAP, lw=2, alpha=1.0, ls='--',zorder=30,label="X-GAP")
         ax_Phot_norm.plot(R_XGAP, lPe_500_XGAP, color=colour_XGAP, lw=2, alpha=1.0, ls='--',zorder=30,label="X-GAP")
@@ -382,43 +436,7 @@ for i in range(len(lM200c_XGAP)):
 
 #    ax_Zhot_all.fill_between(R_XGAP,lZFelo_XGAP,lZFehi_XGAP, color=colour_XGAP, alpha=0.2, zorder=30-i)
 
-
-
-lMvir_Wu = [11.5,12.5]
-redshift_Wu = [0.0, 0.0]
-for i in range(len(lMvir_Wu)):
-    lMvir,fRvir,DM,DMerr =  data.WuMcQuinn_2023_FRB(lMvir_Wu[i])
-    logerr_positive_DM = np.log10(DM+DMerr)-np.log10(DM)
-    logerr_negative_DM = np.where(np.isfinite(np.log10(DM)-np.log10(DM-DMerr)), np.log10(DM)-np.log10(DM-DMerr),0.0001)
-    fR200c_Wu = myutils.fRvir_to_fR200c(fRvir,10**lMvir,redshift_Wu[i])
-    lM200c_Wu = myutils.lMvir_to_lM200c(lMvir,redshift_Wu[i])
-    colour_DM = cm((lM200c_Wu[0]-cmlo)/(cmhi-cmlo))
-    DM = np.where(DM>0,DM,0.0001)
-    if(i==0):
-        ax_DM_all.errorbar(fR200c_Wu,np.log10(DM),[logerr_negative_DM,logerr_positive_DM],color=colour_DM,ls='',marker='D',ms=10,zorder=30,alpha=1.0,label="Wu/McQuinn+2023")
-    else:
-        ax_DM_all.errorbar(fR200c_Wu,np.log10(DM),[logerr_negative_DM,logerr_positive_DM],color=colour_DM,ls='',marker='D',ms=10,zorder=30,alpha=1.0)
-
-lM200c_Pratt2021 = 13.9
-R200c_Pratt2021, ySZ_data_Pratt2021, ySZ_err_Pratt2021 = data.Pratt_2021_tSZ()
-logerr_positive_Pratt2021 = np.log10(ySZ_data_Pratt2021+ySZ_err_Pratt2021)-np.log10(ySZ_data_Pratt2021)
-logerr_negative_Pratt2021 = np.where(np.isfinite(np.log10(ySZ_data_Pratt2021)-np.log10(ySZ_data_Pratt2021-ySZ_err_Pratt2021)), np.log10(ySZ_data_Pratt2021)-np.log10(ySZ_data_Pratt2021-ySZ_err_Pratt2021),10)
-colour_Pratt=cm((lM200c_Pratt2021-cmlo)/(cmhi-cmlo))
-ax_ySZ_all.errorbar(R200c_Pratt2021[np.where(R200c_Pratt2021<=2.0)],np.log10(ySZ_data_Pratt2021[np.where(R200c_Pratt2021<=2.0)]),[logerr_negative_Pratt2021[np.where(R200c_Pratt2021<=2.0)],logerr_positive_Pratt2021[np.where(R200c_Pratt2021<=2.0)]], color=colour_Pratt,ls='',marker='o',zorder=30,alpha=1.0,label="Pratt+2021 $Gr$")
-
-ax_ySZ_all.errorbar(R200c_Pratt2021[np.where(R200c_Pratt2021>2.0)],np.log10(ySZ_data_Pratt2021[np.where(R200c_Pratt2021>2.0)]),[logerr_negative_Pratt2021[np.where(R200c_Pratt2021>2.0)],logerr_positive_Pratt2021[np.where(R200c_Pratt2021>2.0)]], color=colour_Pratt,ls='',marker='o',zorder=30,alpha=0.2)
-
-lM200c_Bregman2022 = 12.5
-Rkpc_Bregman2022,ySZ_med_Bregman2022,ySZ_err_Bregman2022 = data.Bregman_2022_tSZ()
-logerr_positive_Bregman2022 = np.log10(ySZ_med_Bregman2022+ySZ_err_Bregman2022)-np.log10(ySZ_med_Bregman2022)
-logerr_negative_Bregman2022 = np.where(np.isfinite(np.log10(ySZ_med_Bregman2022)-np.log10(ySZ_med_Bregman2022-ySZ_err_Bregman2022)), np.log10(ySZ_med_Bregman2022)-np.log10(ySZ_med_Bregman2022-ySZ_err_Bregman2022),10)
-colour_Bregman=cm((lM200c_Bregman2022-cmlo)/(cmhi-cmlo))
-
-R200c_Bregman2022 = Rkpc_Bregman2022/myutils.R200c_from_lM200c(lM200c_Bregman2022)
-
-ax_ySZ_all.errorbar(R200c_Bregman2022[np.where(R200c_Bregman2022<=2.0)],np.log10(ySZ_med_Bregman2022[np.where(R200c_Bregman2022<=2.0)]),[logerr_negative_Bregman2022[np.where(R200c_Bregman2022<=2.0)],logerr_positive_Bregman2022[np.where(R200c_Bregman2022<=2.0)]], color=colour_Bregman,marker='o',ls='',zorder=30,alpha=1.0,label="Bregman+2022 L*")
-ax_ySZ_all.errorbar(R200c_Bregman2022[np.where(R200c_Bregman2022>2.0)],np.log10(ySZ_med_Bregman2022[np.where(R200c_Bregman2022>2.0)]),[logerr_negative_Bregman2022[np.where(R200c_Bregman2022>2.0)],logerr_positive_Bregman2022[np.where(R200c_Bregman2022>2.0)]], color=colour_Bregman,marker='o',ls='',zorder=30,alpha=0.2)
-
+lM200c_Lovisari2019 = 13.55+0.15
 R200c_Lovisari2019, Z_data_Lovisari2019, Z_err_Lovisari2019 = data.Lovisari_2019_Z(combined=True)
 logerr_positive_Lovisari2019 = np.log10(Z_data_Lovisari2019+Z_err_Lovisari2019)-np.log10(Z_data_Lovisari2019)
 logerr_negative_Lovisari2019 = np.log10(Z_data_Lovisari2019)-np.log10(Z_data_Lovisari2019-Z_err_Lovisari2019)
@@ -426,6 +444,8 @@ colour_Lovisari=cm((13.7-cmlo)/(cmhi-cmlo))
 ax_Zhot_all.plot(R200c_Lovisari2019,np.log10(Z_data_Lovisari2019), color=colour_Lovisari, marker='o',alpha=1.0,ls='',zorder=30,label="Lovisari+2019 $Gr$")
 ax_Zhot_all.errorbar(R200c_Lovisari2019,np.log10(Z_data_Lovisari2019),[logerr_negative_Lovisari2019,logerr_positive_Lovisari2019], color=colour_Lovisari,ls='',zorder=30,alpha=1.0)
 
+
+lM200c_Ghizzardi2021 = 14.9
 R200c_Ghizzardi2021, Z_data_Ghizzardi2021, Z_err_Ghizzardi2021 = data.Ghizzardi_2021_Z()
 logerr_positive_Ghizzardi2021 = np.log10(Z_data_Ghizzardi2021+Z_err_Ghizzardi2021)-np.log10(Z_data_Ghizzardi2021)
 logerr_negative_Ghizzardi2021 = np.log10(Z_data_Ghizzardi2021)-np.log10(Z_data_Ghizzardi2021-Z_err_Ghizzardi2021)
@@ -464,7 +484,6 @@ for i in range(len(massbinname)):
     ax_SoftXray_all.errorbar(R200c_frac_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)],np.log10(XSB_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)]), yerr=[logerr_negative_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)],logerr_positive_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)]],xerr=[Rlo200c_frac_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)],Rhi200c_frac_eRASS4[np.where(R200c_frac_eRASS4>R200m/R200c)]], lw=1, ls='',fmt='o',color=colour_Zhang, zorder=30, alpha=0.2)
 
 
-#M500c_eRASS4, LX_eRASS4, M500c_errlo_eRASS4, M500c_errhi_eRASS4, LX_err_eRASS4 = data.Zhang_2024b_eRASS4_LX()
 M500c_eRASS4, M500c_errlo_eRASS4, M500c_errhi_eRASS4, LX_eRASS4, LX_err_eRASS4 = data.Zhang_2024b_eRASS4_LX()
 
 logerr_positive_eRASS4_M500c = np.log10(M500c_eRASS4+M500c_errhi_eRASS4)-np.log10(M500c_eRASS4)
@@ -485,22 +504,119 @@ ax_LXsum.errorbar(myutils.lM500c_to_lM200c(np.log10(M500c_eRASS4),redshift_eRASS
 #print("Ml500_L15,lLX_L15= ",lM500_L15,lLX_L15)
 #ax_LXsum.plot(myutils.lM500c_to_lM200c(lM500_L15,redshift_L15),lLX_L15,lw=2,ls="--",color="k",label="Lovisari+2015",zorder=30,alpha=1.0)
 
-lM500c_Akino = [13.0,13.1,13.2,13.3,13.4,13.5,13.6,13.7,13.8,14.2,14.3,14.4,14.5,14.6,14.7,14.8,14.9,15.0]
-lM200c_Akino = []
-LX500_Akino = []
-LX500_lo_Akino = []
-LX500_hi_Akino = []
-for h in range(len(lM500c_Akino)):
-    lM200c_hold = myutils.lM500c_to_lM200c(lM500c_Akino[h])
-    M500c_hold, LX, LX_lo, LX_hi = data.Akino_2022_M500_LX(lM200c_hold,redshift_DPM)
-    lM200c_Akino.append(myutils.lM500c_to_lM200c(np.log10(M500c_hold)))          
-    LX500_Akino.append(LX)
-    LX500_lo_Akino.append(LX_lo)
-    LX500_hi_Akino.append(LX_hi)
+#### Sunyaev-Zeldovich ####
 
-ax_LXsum.plot(lM200c_Akino,np.log10(LX500_Akino), color='k', lw = 2, alpha=1.0, ls='--',zorder=30,label="Akino+2022")
-ax_LXsum.plot(lM200c_Akino,np.log10(LX500_lo_Akino), color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
-ax_LXsum.plot(lM200c_Akino,np.log10(LX500_hi_Akino), color='k', lw = 1, alpha=1.0, ls='--',zorder=30)
+# We do not plot this in the publicly available version.
+lM200c_Schaan2021 = 13.5
+R200c_Schaan2021_arcmin = 1.37
+
+#R_arcmin, deltaT_CAP_data_muK_arcmin2, deltaT_CAP_err_muK_arcmin2 = data.Schaan_2021_tSZ_CMASS()
+
+#R_arcmin_f090,deltaT_CAP_data_f090_muK_arcmin2,deltaT_CAP_err_f090_muK_arcmin2,R_arcmin_f150,deltaT_CAP_data_f150_muK_arcmin2,deltaT_CAP_err_f150_muK_arcmin2 = data.Schaan_2021_kSZ_CMASS()
+
+#fR200c_Schaan2021_tSZ = R_arcmin/R200c_Schaan2021_arcmin
+#fR200c_Schaan2021_kSZ = R_arcmin_f090/R200c_Schaan2021_arcmin
+
+
+lM200c_Pratt2021 = 13.9
+R200c_Pratt2021, ySZ_data_Pratt2021, ySZ_err_Pratt2021 = data.Pratt_2021_tSZ()
+logerr_positive_Pratt2021 = np.log10(ySZ_data_Pratt2021+ySZ_err_Pratt2021)-np.log10(ySZ_data_Pratt2021)
+logerr_negative_Pratt2021 = np.where(np.isfinite(np.log10(ySZ_data_Pratt2021)-np.log10(ySZ_data_Pratt2021-ySZ_err_Pratt2021)), np.log10(ySZ_data_Pratt2021)-np.log10(ySZ_data_Pratt2021-ySZ_err_Pratt2021),10)
+colour_Pratt=cm((lM200c_Pratt2021-cmlo)/(cmhi-cmlo))
+ax_ySZ_all.errorbar(R200c_Pratt2021[np.where(R200c_Pratt2021<=2.0)],np.log10(ySZ_data_Pratt2021[np.where(R200c_Pratt2021<=2.0)]),[logerr_negative_Pratt2021[np.where(R200c_Pratt2021<=2.0)],logerr_positive_Pratt2021[np.where(R200c_Pratt2021<=2.0)]], color=colour_Pratt,ls='',marker='o',zorder=30,alpha=1.0,label="Pratt+2021 $Gr$")
+
+ax_ySZ_all.errorbar(R200c_Pratt2021[np.where(R200c_Pratt2021>2.0)],np.log10(ySZ_data_Pratt2021[np.where(R200c_Pratt2021>2.0)]),[logerr_negative_Pratt2021[np.where(R200c_Pratt2021>2.0)],logerr_positive_Pratt2021[np.where(R200c_Pratt2021>2.0)]], color=colour_Pratt,ls='',marker='o',zorder=30,alpha=0.2)
+
+
+lM200c_Bregman2022 = 12.5
+Rkpc_Bregman2022,ySZ_med_Bregman2022,ySZ_errneg_Bregman2022,ySZ_errpos_Bregman2022 = data.Bregman_2022_tSZ()
+logerr_positive_Bregman2022 = np.log10(ySZ_med_Bregman2022+ySZ_errpos_Bregman2022)-np.log10(ySZ_med_Bregman2022)
+logerr_negative_Bregman2022 = np.where(np.isfinite(np.log10(ySZ_med_Bregman2022)-np.log10(ySZ_med_Bregman2022-ySZ_errneg_Bregman2022)), np.log10(ySZ_med_Bregman2022)-np.log10(ySZ_med_Bregman2022-ySZ_errneg_Bregman2022),10)
+colour_Bregman=cm((lM200c_Bregman2022-cmlo)/(cmhi-cmlo))
+
+R200c_Bregman2022 = Rkpc_Bregman2022/myutils.R200c_from_lM200c(lM200c_Bregman2022)
+
+
+ax_ySZ_all.errorbar(R200c_Bregman2022[np.where(R200c_Bregman2022<=2.0)],np.log10(ySZ_med_Bregman2022[np.where(R200c_Bregman2022<=2.0)]),[logerr_negative_Bregman2022[np.where(R200c_Bregman2022<=2.0)],logerr_positive_Bregman2022[np.where(R200c_Bregman2022<=2.0)]], color=colour_Bregman,marker='o',ls='',zorder=30,alpha=1.0,label="Bregman+2022 L*")
+ax_ySZ_all.errorbar(R200c_Bregman2022[np.where(R200c_Bregman2022>2.0)],np.log10(ySZ_med_Bregman2022[np.where(R200c_Bregman2022>2.0)]),[logerr_negative_Bregman2022[np.where(R200c_Bregman2022>2.0)],logerr_positive_Bregman2022[np.where(R200c_Bregman2022>2.0)]], color=colour_Bregman,marker='o',ls='',zorder=30,alpha=0.2)
+
+#### Fast Radio Burst ####
+
+lMvir_Wu = [11.5,12.5]
+redshift_Wu = [0.0, 0.0]
+for i in range(len(lMvir_Wu)):
+    lMvir,fRvir,DM,DMerr =  data.WuMcQuinn_2023_FRB(lMvir_Wu[i])
+    logerr_positive_DM = np.log10(DM+DMerr)-np.log10(DM)
+    logerr_negative_DM = np.where(np.isfinite(np.log10(DM)-np.log10(DM-DMerr)), np.log10(DM)-np.log10(DM-DMerr),0.0001)
+    fR200c_Wu = myutils.fRvir_to_fR200c(fRvir,10**lMvir,redshift_Wu[i])
+    lM200c_Wu = myutils.lMvir_to_lM200c(lMvir,redshift_Wu[i])
+    #print("fR200c_Wu=", fR200c_Wu)
+    #print("lM200c_Wu=", lM200c_Wu)
+    colour_DM = cm((lM200c_Wu[0]-cmlo)/(cmhi-cmlo))
+    DM = np.where(DM>0,DM,0.0001)
+    if(i==0):
+        ax_DM_all.errorbar(fR200c_Wu,np.log10(DM),[logerr_negative_DM,logerr_positive_DM],color=colour_DM,ls='',marker='D',ms=10,zorder=30,alpha=1.0,label="Wu&McQuinn 2023")
+    else:
+        ax_DM_all.errorbar(fR200c_Wu,np.log10(DM),[logerr_negative_DM,logerr_positive_DM],color=colour_DM,ls='',marker='D',ms=10,zorder=30,alpha=1.0)
+        
+        
+#lmhmed_125,rvir_125,DM_125,DMerr_125 =  data.WuMcQuinn_2023_FRB(12.5)
+#logerr_positive_DM_125 = np.log10(DM_125+DMerr_125)-np.log10(DM_125)
+#logerr_negative_DM_125 = np.where(np.isfinite(np.log10(DM_125)-np.log10(DM_125-DMerr_125)), np.log10(DM_125)-np.log10(DM_125-DMerr_125),0.0001)
+#colour_DM_125 = cm((12.5-cmlo)/(cmhi-cmlo))
+#DM_125 = np.where(DM_125>0,DM_125,0.0001)
+#ax_DM_all.errorbar(rvir_125,np.log10(DM_125),[logerr_negative_DM_125,logerr_positive_DM_125],color=colour_DM_125,ls='',marker='D',ms=15,zorder=30,alpha=1.0,label="Wu/McQuinn 2023")
+
+#### Ultraviolet ####
+
+### TURNED THIS CATALOGUE OF COS-HALOS OFF, AND USE TCHERNYSHYOV+ 2022 
+#Rproj_COSHalos, NOVI_COSHalos, NOVI_tag_COSHalos,NOVI_err_COSHalos,lM200c_COSHalos,lM200c_errpos_COSHalos,lM200c_errneg_COSHalos,redshiftgal_COSHalos =  data_abslines.read_COSHalos()
+
+#Replacing the arbitrary limit of 13.3 as of 8/9/24
+###lM200c_COSHalos = np.where(lM200c_COSHalos>13.3,13.3,lM200c_COSHalos)
+
+#R200c_COSHalos = myutils.R200c_from_lM200c(lM200c_COSHalos,redshiftgal_COSHalos)
+#R200frac_COSHalos = Rproj_COSHalos/R200c_COSHalos
+#colour_COSHalos=cm((lM200c_COSHalos-cmlo)/(cmhi-cmlo))
+
+#R200c_COSHalos_min = myutils.R200c_from_lM200c(lM200c_COSHalos-lM200c_errneg_COSHalos,redshiftgal_COSHalos)
+#R200frac_COSHalos_min = Rproj_COSHalos/R200c_COSHalos_min
+#colour_COSHalos_min=cm((lM200c_COSHalos-lM200c_errneg_COSHalos-cmlo)/(cmhi-cmlo))
+
+#R200c_COSHalos_max = myutils.R200c_from_lM200c(lM200c_COSHalos+lM200c_errpos_COSHalos,redshiftgal_COSHalos)
+#R200frac_COSHalos_max = Rproj_COSHalos/R200c_COSHalos_max
+#colour_COSHalos_max=cm((lM200c_COSHalos+lM200c_errpos_COSHalos-cmlo)/(cmhi-cmlo))
+
+
+#NOVI_COSHalos = []
+#for i in range(len(NOVI_COSHalos)):
+#    if(i==3):
+#        ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], yerr=NOVI_err_COSHalos[i], lw=1, ls='',fmt='o',color=colour_COSHalos[i],label="COS-Halos", zorder=31)
+#    else:
+#        if(NOVI_tag_COSHalos[i] == 3):
+            #ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], lw=1, ls='',fmt='v',color=colour_COSHalos[i], zorder=30)
+#            ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], lw=1, ls='',fmt='o',fillstyle="none",color=colour_COSHalos[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_min[i], NOVI_COSHalos[i], lw=1,ls='',fillstyle="none",color=colour_COSHalos_min[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_max[i], NOVI_COSHalos[i], lw=1,ls='',fillstyle="none",color=colour_COSHalos_max[i], zorder=30)
+#        if(NOVI_tag_COSHalos[i] == 2):
+            #ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], lw=1, ls='',fmt='^',color=colour_COSHalos[i], zorder=30)
+#            ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], lw=1, ls='',fmt='o',color=colour_COSHalos[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_min[i], NOVI_COSHalos[i], lw=1,ls='',color=colour_COSHalos_min[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_max[i], NOVI_COSHalos[i], lw=1,ls='',color=colour_COSHalos_max[i], zorder=30)
+#        if(NOVI_tag_COSHalos[i] == 1):
+#            ax_NOVI_all.errorbar(R200frac_COSHalos[i], NOVI_COSHalos[i], lw=1, ls='',fmt='o',color=colour_COSHalos[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_min[i], NOVI_COSHalos[i], lw=1,ls='',color=colour_COSHalos_min[i], zorder=30)
+#            ax_NOVI_all.plot(R200frac_COSHalos_max[i], NOVI_COSHalos[i], lw=1,ls='',color=colour_COSHalos_max[i], zorder=30)
+#            print("NOVI R200frac-med,min,max= ", R200frac_COSHalos[i],R200frac_COSHalos_min[i],R200frac_COSHalos_max[i])
+            
+###Rproj_Voit,logU_Voit, logUhi_Voit, logUlo_Voit, lM200c_Voit, lM200c_errpos_Voit, lM200c_errneg_Voit, redshift_Voit = data.Voit_LogU(sample="no-COS-Halos")            
+###Rproj_Voit,logU_Voit, logUhi_Voit, logUlo_Voit, lM200c_Voit, lM200c_errpos_Voit, lM200c_errneg_Voit, redshift_Voit = data.Voit_LogU(sample="no-COS-Halos")            
+
+#lM200c_Voit = np.where(lM200c_Voit>13.3,13.3,lM200c_Voit) #Taking this out as of 8/9/24
+
+
+#Voit_surveys = ["COS-LRG","COS-GTO-10.2-11.3","COS-GTO-9.4-9.8","COS-Halos-9.5-10.3","COS-Halos-10.3-11.4"]
+#Voit_symbols = ['X','p','P','D','s']
 
 Voit_surveys = ["COS-Halos-SF", "COS-Halos-Q", "COS-LRG", "COS-GTO-SF", "COS-GTO-Q"]
 Voit_symbols = ['s', 'D', '*','P','X']
@@ -508,8 +624,12 @@ Voit_symbols = ['s', 'D', '*','P','X']
 
 for k in range(len(Voit_surveys)):
     #Rproj_Voit,logU_Voit, logUhi_Voit, logUlo_Voit, lM200c_Voit, lM200c_errpos_Voit, lM200c_errneg_Voit, redshift_Voit = data.Voit_LogU(Voit_surveys[k])
-    Rproj_Voit,logP_v2_Voit, logPhi_v2_Voit, logPlo_v2_Voit, lM200c_Voit, lM200c_errpos_Voit, lM200c_errneg_Voit, redshift_Voit, passive_Voit = data.Voit_LogP(Voit_surveys[k])  
+    Rproj_Voit,logP_v2_Voit, logPhi_v2_Voit, logPlo_v2_Voit, lM200c_Voit, lM200c_errpos_Voit, lM200c_errneg_Voit, redshift_Voit, passive_Voit = data.Voit_LogP(Voit_surveys[k])
 
+    logP_v2_Voit -= 8/3.*np.log10(myutils.E(redshift_Voit))
+    logPhi_v2_Voit -= 8/3.*np.log10(myutils.E(redshift_Voit))
+    logPlo_v2_Voit -= 8/3.*np.log10(myutils.E(redshift_Voit))
+    
     R200c_Voit = myutils.R200c_from_lM200c(lM200c_Voit, redshift_Voit)
     R200c_errpos_Voit = myutils.R200c_from_lM200c(lM200c_Voit+lM200c_errpos_Voit, redshift_Voit)
     R200c_errneg_Voit = myutils.R200c_from_lM200c(lM200c_Voit-lM200c_errneg_Voit, redshift_Voit)
@@ -535,12 +655,16 @@ for k in range(len(Voit_surveys)):
             ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], lw=1,ls='',fmt=Voit_symbols[k],color=colour_Voit[i],zorder=30)
         #ax_Phot_all.arrow(R200frac_Voit[i], logP, 0.15*R200frac_Voit[i], 0.0, color=colour_Voit[i],width=0.02,head_width=0.1,head_length=0.05*R200frac_Voit[i],zorder=30)
 
-        #print("R200frac_Voit med,max,min, logP, logM med,max,min= ",R200frac_Voit[i],R200frac_errpos_Voit[i],R200frac_errneg_Voit[i],logP_v2_Voit[i],lM200c_Voit[i]+lM200c_errpos_Voit[i],lM200c_Voit[i]-lM200c_errneg_Voit[i])
-        ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], xerr=[[R200frac_Voit[i]-R200frac_errpos_Voit[i]],[0]],lw=1,ls='',color=colour_errpos_Voit[i],zorder=30)
-        #ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], xerr=[[0],[R200frac_errneg_Voit[i]-R200frac_Voit[i]]],lw=1,ls='',color=colour_errneg_Voit[i],zorder=30)
-        ax_Phot_all.arrow(R200frac_Voit[i], logP_v2_Voit[i], R200frac_errneg_Voit[i]-R200frac_Voit[i], 0.0, color=colour_errneg_Voit[i],width=0.01,head_width=0.1,head_length=0.05*R200frac_Voit[i],zorder=30)
-
-
+        if(coloured_errorbars):
+            #print("R200frac_Voit med,max,min, logP, logM med,max,min= ",R200frac_Voit[i],R200frac_errpos_Voit[i],R200frac_errneg_Voit[i],logP_v2_Voit[i],lM200c_Voit[i]+lM200c_errpos_Voit[i],lM200c_Voit[i]-lM200c_errneg_Voit[i])
+            ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], xerr=[[R200frac_Voit[i]-R200frac_errpos_Voit[i]],[0]],lw=1,ls='',color=colour_errpos_Voit[i],zorder=30)
+            #ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], xerr=[[0],[R200frac_errneg_Voit[i]-R200frac_Voit[i]]],lw=1,ls='',color=colour_errneg_Voit[i],zorder=30)
+            ax_Phot_all.arrow(R200frac_Voit[i], logP_v2_Voit[i], R200frac_errneg_Voit[i]-R200frac_Voit[i], 0.0, color=colour_errneg_Voit[i],width=0.01,head_width=0.1,head_length=0.05*R200frac_Voit[i],zorder=30)
+        else:
+            ax_Phot_all.errorbar(R200frac_Voit[i], logP_v2_Voit[i], xerr=[[R200frac_Voit[i]-R200frac_errpos_Voit[i]],[0]],lw=1,ls='',color=colour_Voit[i],zorder=30)
+            ax_Phot_all.arrow(R200frac_Voit[i], logP_v2_Voit[i], R200frac_errneg_Voit[i]-R200frac_Voit[i], 0.0, color=colour_Voit[i],width=0.01,head_width=0.1,head_length=0.05*R200frac_Voit[i],zorder=30)
+              
+            
 Rproj_P17,lognH_P17, lognHlo_P17, lognHhi_P17, lM200c_P17, lM200c_errpos_P17, lM200c_errneg_P17, redshift_P17 = data.Prochaska_2017_Densities()
 
 lognH_P17 = [] # Effectively does not plot Prochaska because it is now combined with Voit+19 9/5/24
@@ -573,9 +697,10 @@ for i in range(len(lognH_P17)):
     #ax_Phot_all.errorbar(R200frac_P17[i], logP, xerr=[[0],[R200frac_errneg_P17[i]-R200frac_P17[i]]],lw=1,ls='',color=colour_errneg_P17[i],zorder=30)
     ax_Phot_all.arrow(R200frac_P17[i], logP, R200frac_errneg_P17[i]-R200frac_P17[i], 0.0, color=colour_errneg_P17[i],width=0.01,head_width=0.1,head_length=0.05*R200frac_P17[i],zorder=30)
 
-    
+
 T22_surveys = ["COS-Halos","CGM^2","COS-LRG","COS-GTO-17","COS-GTO-18","eCGM","RDR","QSAGE","Johnson+2017"]
 T22_symbols = ['s','o','*','P','X','p','h','8','d']
+
 
 for k in range(len(T22_surveys)):
     #Rproj_T22, R200c_T22, lNOVI_T22, OVIflag_T22, lMStar_T22, redshift_T22 = data.Tchernyshyov_2022_NOVI(T22_surveys[i])
@@ -604,23 +729,26 @@ for k in range(len(T22_surveys)):
         if(legend_done==0):
             if(OVIflag_T22[i]==0):
                 legend_done = 1
-                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], lw=1, ls='', marker=T22_symbols[k],zorder=30,label=T22_surveys[k])
+                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], ms=10, ls='', marker=T22_symbols[k],zorder=30,label=T22_surveys[k])
             else:
-                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], lw=1, ls='', marker=T22_symbols[k], fillstyle="none",zorder=30)
+                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], ms=10, ls='', marker=T22_symbols[k], fillstyle="none",zorder=30)
 
         else:
             if(OVIflag_T22[i]==0):
-                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], lw=1, ls='', marker=T22_symbols[k],zorder=30) 
+                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], ms=10, ls='', marker=T22_symbols[k],zorder=30) 
             else:
-                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], lw=1, ls='', marker=T22_symbols[k], fillstyle="none",zorder=30)
+                ax_NOVI_all.plot(Rproj_T22[i]/R200c_T22[i], lNOVI_T22[i], color=colour_T22[i], ms=10, ls='', marker=T22_symbols[k], fillstyle="none",zorder=30)
 
-        ax_NOVI_all.errorbar(R200frac_T22[i], lNOVI_T22[i], xerr=[[R200frac_T22[i]-R200frac_errpos_T22[i]],[0]],lw=1,ls='',color=colour_errpos_T22[i],zorder=30)
-        ax_NOVI_all.errorbar(R200frac_T22[i], lNOVI_T22[i], xerr=[[0],[R200frac_errneg_T22[i]-R200frac_T22[i]]],lw=1,ls='',color=colour_errneg_T22[i],zorder=30)
-        #print("R200c_T22_given, R200c_T22, R200c_T22/R200c_T22_given= ",R200c_T22_given[i], R200c_T22[i], R200c_T22[i]/R200c_T22_given[i],i,j)
-    
-R_200c = 10**(np.linspace(-2.0,0.0,21))
-R_500c = myutils.fR200c_to_fR500c(R_200c,10**15.0,redshift[0]) # XXXX NOTE this redshift is from the loop, but outside of it.
-ax_Khot_norm.plot(R_200c, np.log10(1.32/1.09 * (R_500c)**1.1),color="gray",lw=2,ls=":",label="Voit+ (2005)")
+        if(coloured_errorbars):
+            ax_NOVI_all.errorbar(R200frac_T22[i], lNOVI_T22[i], xerr=[[R200frac_T22[i]-R200frac_errpos_T22[i]],[0]],lw=1,ls='',color=colour_errpos_T22[i],zorder=30)
+            ax_NOVI_all.errorbar(R200frac_T22[i], lNOVI_T22[i], xerr=[[0],[R200frac_errneg_T22[i]-R200frac_T22[i]]],lw=1,ls='',color=colour_errneg_T22[i],zorder=30)
+        else:
+            ax_NOVI_all.errorbar(R200frac_T22[i], lNOVI_T22[i], xerr=[[R200frac_T22[i]-R200frac_errpos_T22[i]],[R200frac_errneg_T22[i]-R200frac_T22[i]]],lw=1,ls='',color=colour_T22[i],zorder=30)
+
+
+R200c = 10**(np.linspace(-2.0,0.0,21))
+R500c = myutils.fR200c_to_fR500c(R200c,10**15.0,redshift[0]) # XXXX NOTE this redshift is from the loop, but outside of it.
+ax_Khot_norm.plot(R200c, np.log10(1.32/1.09 * (R500c)**1.1),color="gray",lw=2,ls=":",label="Voit+ (2005)")
 
 fbar = myc.Omegab/myc.OmegaM
 ax_fgas.plot([10.0,16.0],[fbar,fbar],color="gray",lw=2,ls="--")
@@ -676,9 +804,8 @@ fR500c = np.zeros(len(lM200c_plotR500c_frac))
 for i in range(len(lM200c_plotR500c_frac)):
     fR500c[i] = myutils.fR500c_to_fR200c(1.0,10**lM200c_plotR500c_frac[i],redshift[0])
 
-file_output_type = ".png"
-
-
+file_output_type = ".png" #".pdf" 
+    
 ax_Phot_all.set_xscale('log')
 ax_Phot_all.set_xlim(10**lRlow,10**lRhigh)
 ylo = -0.5
@@ -1014,4 +1141,45 @@ fig_rhoDM.gca().add_artist(legend)
 ax_rhoDM.legend(loc="lower right", ncol=1,fontsize=16)
 fig_rhoDM.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
 fig_rhoDM.savefig(PlotDir + 'rhoDM.' + lsfilename + file_output_type)
+
+
+ax_fb.set_xscale('log')
+ax_fb.set_xlim(10**lRlow,10**lRhigh)
+ylo = 0
+yhi = 0.25
+ax_fb.set_ylim(ylo,yhi)
+ax_fb.set_xticks([0.03,0.1,0.3,1.0,2.0])
+ax_fb.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
+ax_fb.set_xlabel('$r/R_{200}$',fontsize=24)
+ax_fb.set_ylabel(r'$M_\mathrm{gas}(<r)/(M_\mathrm{gas}(<r)+M_\mathrm{DM}(<r))$',fontsize=24)
+ax_fb.plot([1,1],[-10,100],color='k',lw=1,ls=':')
+for i in range(len(lM200c_plotR500c_frac)):
+    ax_fb.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_fb.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
+ax_fb.plot([-10,100],[0.16,0.16],color='gray',lw=2,ls='--')
+legend = ax_fb.legend(label_object, label_array, loc='upper right',fontsize=16)
+fig_fb.gca().add_artist(legend)
+ax_fb.legend(loc="lower right", ncol=1,fontsize=16)
+fig_fb.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
+fig_fb.savefig(PlotDir + 'fb_hot.' + lsfilename + file_output_type)
+
+ax_HSE.set_xscale('log')
+ax_HSE.set_xlim(10**lRlow,10**lRhigh)
+ylo = 0
+yhi = 4.0
+ax_HSE.set_ylim(ylo,yhi)
+ax_HSE.set_xticks([0.03,0.1,0.3,1.0,2.0])
+ax_HSE.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
+ax_HSE.set_xlabel('$r/R_{200}$',fontsize=24)
+ax_HSE.set_ylabel(r'HSE Ratio',fontsize=24)
+ax_HSE.plot([1,1],[-10,100],color='k',lw=1,ls=':')
+for i in range(len(lM200c_plotR500c_frac)):
+    ax_HSE.plot([fR500c[i],fR500c[i]],[-10,100],lw=1,ls=':',color='gray')#,color=cm((lM200c_plotR500c_frac[i]-cmlo)/(cmhi-cmlo)))
+    ax_HSE.text(fR500c[i]-0.08,(yhi-ylo)*0.95+ylo,r"$R_{500}$",rotation=90,color='gray')
+ax_HSE.plot([-10,100],[1.0,1.0],color='gray',lw=2,ls='--')
+legend = ax_HSE.legend(label_object, label_array, loc='upper right',fontsize=16)
+fig_HSE.gca().add_artist(legend)
+ax_HSE.legend(loc="lower right", ncol=1,fontsize=16)
+fig_HSE.subplots_adjust(left=0.14, bottom=0.13,top=0.98,right=0.98)
+fig_HSE.savefig(PlotDir + 'HSE_ratio.' + lsfilename + file_output_type)
 
